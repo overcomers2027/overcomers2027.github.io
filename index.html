@@ -144,6 +144,10 @@
             Completá los pasos y firmá con tu dedo o mouse. El documento PDF se enviará automáticamente a la Coordinación.
             <span class="block text-slate-400 mt-0.5">請依序完成以下步驟並親筆簽名，系統將自動產生 PDF 並傳送至大會。</span>
           </p>
+          <div class="mt-3 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2 text-xs text-amber-900 leading-relaxed">
+            <strong>Paso 1 de 2:</strong> firmá acá las normas. Al terminar, un botón te lleva al <strong>formulario de inscripción</strong> (paso 2) con tus datos ya cargados.
+            <span class="block text-amber-800/80 mt-0.5">第 1 步（共 2 步）：在此簽署規則。完成後，按鈕會帶你前往<strong>報名表</strong>（第 2 步），你的資料將自動填入。</span>
+          </div>
         </div>
       </div>
     </section>
@@ -286,21 +290,42 @@
           <!-- Campos Bloque A -->
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label for="nombreSolicitante" class="block text-xs sm:text-sm font-semibold text-slate-700 mb-1.5">
-                Nombre y Apellido <span class="text-slate-500 font-normal">/ 姓名</span> <span class="text-rose-500">*</span>
+              <label for="apellidoSolicitante" class="block text-xs sm:text-sm font-semibold text-slate-700 mb-1.5">
+                Apellido <span class="text-slate-500 font-normal">/ 姓</span> <span class="text-rose-500">*</span>
               </label>
               <input
                 type="text"
-                id="nombreSolicitante"
-                name="nombreSolicitante"
-                autocomplete="name"
-                placeholder="Ej: Juan Pérez"
+                id="apellidoSolicitante"
+                name="apellidoSolicitante"
+                autocomplete="family-name"
+                placeholder="Ej: Pérez"
                 class="w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-slate-900 placeholder:text-slate-400 focus:border-brand-600 focus:ring-2 focus:ring-brand-500/20 outline-none transition-all"
               />
-              <p id="errNombreSolicitante" class="hidden text-xs font-medium text-rose-600 mt-1">
-                Ingresá tu nombre y apellido. / 請輸入姓名。
+              <p class="text-[11px] text-slate-400 mt-1">
+                Como figura en el DNI · 按照身分證填寫
               </p>
             </div>
+
+            <div>
+              <label for="nombrePilaSolicitante" class="block text-xs sm:text-sm font-semibold text-slate-700 mb-1.5">
+                Nombre <span class="text-slate-500 font-normal">/ 名</span> <span class="text-rose-500">*</span>
+              </label>
+              <input
+                type="text"
+                id="nombrePilaSolicitante"
+                name="nombrePilaSolicitante"
+                autocomplete="given-name"
+                placeholder="Ej: Juan"
+                class="w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-slate-900 placeholder:text-slate-400 focus:border-brand-600 focus:ring-2 focus:ring-brand-500/20 outline-none transition-all"
+              />
+              <p class="text-[11px] text-slate-400 mt-1">
+                Como figura en el DNI · 按照身分證填寫
+              </p>
+            </div>
+
+            <p id="errNombreSolicitante" class="hidden sm:col-span-2 -mt-2 text-xs font-medium text-rose-600">
+              Ingresá tu apellido y tu nombre. / 請輸入姓和名。
+            </p>
 
             <div>
               <label for="dniSolicitante" class="block text-xs sm:text-sm font-semibold text-slate-700 mb-1.5">
@@ -531,21 +556,36 @@
 
       <div class="space-y-1.5">
         <h2 class="text-xl sm:text-2xl font-extrabold text-slate-900">
-          ¡Autorización enviada con éxito!
+          ¡Firma enviada! Falta un paso
         </h2>
         <p class="text-base font-bold text-emerald-700">
-          簽名與同意書已成功送出！
+          簽名已送出！還差最後一步
         </p>
       </div>
 
       <div class="bg-emerald-50/80 border border-emerald-200/80 rounded-xl p-4 text-sm text-emerald-950 leading-relaxed space-y-1.5 text-left">
         <p class="font-medium">
-          Tu documento PDF firmado ya fue enviado automáticamente a la Coordinación del Campamento de Verano 2027 "OVERCOMERS". <strong>No necesitás subir ningún archivo manualmente.</strong>
+          Tu autorización firmada ya le llegó a la Coordinación. <strong>Ahora completá el formulario de inscripción</strong> (paso 2 de 2). En la sección "Adjuntar" no hace falta subir nada.
         </p>
         <p class="text-xs sm:text-sm text-emerald-800">
-          您所簽署的 PDF 同意書已自動傳送至2027年「得勝者」夏令營大會，<strong>無須再手動上傳任何檔案</strong>。
+          您簽署的同意書已傳送至大會。<strong>現在請填寫報名表</strong>（第 2 步，共 2 步）。「附上」欄位無須上傳任何檔案。
         </p>
       </div>
+
+      <!-- Botón principal: continuar al Formulario de inscripción (paso 2) -->
+      <a
+        id="continueToFormBtn"
+        href="#"
+        class="w-full py-4 px-5 rounded-xl bg-brand-700 hover:bg-brand-800 text-white font-extrabold text-base shadow-md flex items-center justify-center gap-2 transition-all"
+      >
+        <span>Continuar con la inscripción · 前往報名表</span>
+        <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+        </svg>
+      </a>
+      <p id="continueToFormHint" class="hidden -mt-2 text-xs text-slate-500">
+        Tu apellido, nombre y DNI ya van a estar cargados en el formulario. / 你的姓、名及身分證號碼將自動填入報名表。
+      </p>
 
       <!-- Resumen de datos enviados -->
       <div id="successSummary" class="bg-slate-50 rounded-xl border border-slate-200 p-4 text-left text-xs sm:text-sm space-y-2">
@@ -610,7 +650,37 @@
     // CONFIGURACIÓN DE BACKEND (GOOGLE APPS SCRIPT)
     // Pegá aquí la URL de tu Web App desplegada desde Code.gs
     // =========================================================================
-    const APPS_SCRIPT_URL = 'PEGAR_AQUI_URL_DE_GOOGLE_APPS_SCRIPT';
+    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzwr7aEG4fO2ezSZ-XYHo86B31RexMV5tvjOblYL3AnYXOGK04ByG7exw2r_wVPjflLdw/exec';
+
+    // =========================================================================
+    // FORMULARIO DE INSCRIPCIÓN (PASO 2) — se abre al terminar de firmar
+    // GOOGLE_FORM_ENTRIES: números "entry.XXXX" de cada pregunta, sacados del
+    // "vínculo prellenado" del Google Form. Si quedan vacíos, el formulario se
+    // abre igual pero sin datos cargados.
+    // =========================================================================
+    const GOOGLE_FORM_URL = 'https://docs.google.com/forms/d/e/1FAIpQLSeGWv0rR3pyMZ4CcCbK_t-kLLzDvh3JlNqrk1HTgmxjrlNZnw/viewform';
+    const GOOGLE_FORM_ENTRIES = {
+      apellido: '',     // "Apellido / 姓"
+      nombre: '',       // "Nombre / 名"
+      dni: '',          // "N° de DNI / 身分證號碼"
+      mayorDeEdad: ''   // "Al momento de iniciar el campamento ... ¿serás mayor de edad?"
+    };
+    // Texto exacto de las opciones de la pregunta de mayoría de edad en el Form
+    const GOOGLE_FORM_OPCION_MAYOR = { si: 'Si / 是', no: 'No / 否' };
+
+    function buildGoogleFormUrl(data) {
+      const params = new URLSearchParams();
+      const add = (key, value) => {
+        const id = GOOGLE_FORM_ENTRIES[key];
+        if (id && value) params.append('entry.' + id, value);
+      };
+      add('apellido', data.apellidoSolicitante);
+      add('nombre', data.nombrePilaSolicitante);
+      add('dni', data.dniSolicitante);
+      add('mayorDeEdad', data.esMayor ? GOOGLE_FORM_OPCION_MAYOR.si : GOOGLE_FORM_OPCION_MAYOR.no);
+      const query = params.toString();
+      return query ? GOOGLE_FORM_URL + '?usp=pp_url&' + query : GOOGLE_FORM_URL;
+    }
 
     // =========================================================================
     // 13 NORMAS GENERALES (TEXTO OFICIAL BILINGÜE EXACTO)
@@ -933,8 +1003,15 @@
     // =========================================================================
     // ACTUALIZACIÓN DINÁMICA DE LA CLÁUSULA DEL TUTOR (BLOQUE B)
     // =========================================================================
+    // Nombre completo del solicitante ("Nombre Apellido"), usado en el PDF y en Drive
+    function getNombreCompletoSolicitante() {
+      const nombre = document.getElementById('nombrePilaSolicitante').value.trim();
+      const apellido = document.getElementById('apellidoSolicitante').value.trim();
+      return [nombre, apellido].filter(Boolean).join(' ');
+    }
+
     function updateDynamicMinorClause() {
-      const minorName = document.getElementById('nombreSolicitante').value.trim();
+      const minorName = getNombreCompletoSolicitante();
       const minorDni = cleanDocumentId(document.getElementById('dniSolicitante').value);
       const tutorName = document.getElementById('nombreTutor').value.trim();
       const tutorDni = cleanDocumentId(document.getElementById('dniTutor').value);
@@ -1491,7 +1568,8 @@
       btnMenor.addEventListener('click', () => selectAge(false));
 
       // Limpieza en tiempo real de DNI / Pasaporte y actualización de cláusula dinámica
-      const nombreSolInput = document.getElementById('nombreSolicitante');
+      const apellidoSolInput = document.getElementById('apellidoSolicitante');
+      const nombrePilaSolInput = document.getElementById('nombrePilaSolicitante');
       const dniSolInput = document.getElementById('dniSolicitante');
       const nombreTutInput = document.getElementById('nombreTutor');
       const dniTutInput = document.getElementById('dniTutor');
@@ -1511,10 +1589,12 @@
       bindCleanDniInput(dniSolInput, 'errDniSolicitante');
       bindCleanDniInput(dniTutInput, 'errDniTutor');
 
-      nombreSolInput.addEventListener('input', () => {
-        document.getElementById('errNombreSolicitante').classList.add('hidden');
-        nombreSolInput.classList.remove('border-rose-400');
-        updateDynamicMinorClause();
+      [apellidoSolInput, nombrePilaSolInput].forEach((input) => {
+        input.addEventListener('input', () => {
+          document.getElementById('errNombreSolicitante').classList.add('hidden');
+          input.classList.remove('border-rose-400');
+          updateDynamicMinorClause();
+        });
       });
 
       nombreTutInput.addEventListener('input', () => {
@@ -1578,13 +1658,19 @@
         }
 
         // 3. Solicitante
-        const nombreSolicitante = nombreSolInput.value.trim();
+        const apellidoSolicitante = apellidoSolInput.value.trim();
+        const nombrePilaSolicitante = nombrePilaSolInput.value.trim();
+        const nombreSolicitante = getNombreCompletoSolicitante();
         const dniSolicitante = cleanDocumentId(dniSolInput.value);
 
-        if (nombreSolicitante.length < 2) {
+        if (!apellidoSolicitante || !nombrePilaSolicitante) {
           document.getElementById('errNombreSolicitante').classList.remove('hidden');
-          nombreSolInput.classList.add('border-rose-400');
-          markInvalid(nombreSolInput);
+          [apellidoSolInput, nombrePilaSolInput].forEach((input) => {
+            if (!input.value.trim()) {
+              input.classList.add('border-rose-400');
+              markInvalid(input);
+            }
+          });
         }
 
         if (dniSolicitante.length < 5) {
@@ -1635,6 +1721,8 @@
         setGlobalError('');
         return {
           nombreSolicitante,
+          apellidoSolicitante,
+          nombrePilaSolicitante,
           dniSolicitante,
           esMayor: state.esMayor,
           nombreTutor,
@@ -1720,6 +1808,11 @@
             ? 'Mayor de 18 años / 已滿 18 歲'
             : 'Menor de 18 años / 未滿 18 歲';
           document.getElementById('sumFileName').textContent = fileName;
+
+          // Botón "Continuar con la inscripción" con los datos ya cargados
+          document.getElementById('continueToFormBtn').href = buildGoogleFormUrl(data);
+          const formPrefilled = Boolean(GOOGLE_FORM_ENTRIES.apellido || GOOGLE_FORM_ENTRIES.dni);
+          document.getElementById('continueToFormHint').classList.toggle('hidden', !formPrefilled);
 
           const sumTutorRow = document.getElementById('sumTutorRow');
           if (!data.esMayor) {
