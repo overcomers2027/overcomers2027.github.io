@@ -12,10 +12,14 @@
  * 2. En el menú superior, andá a:
  *      Extensiones > Apps Script
  *
- * 3. Borrá el contenido inicial del editor y pegá TODO este archivo `Code.gs`.
+ * 3. Si el proyecto está vacío, borrá el contenido inicial y pegá TODO este archivo.
+ *    Si el proyecto YA tiene otros archivos (por ejemplo, un sistema de recibos),
+ *    NO los toques: creá un archivo nuevo con "+" > "Secuencia de comandos",
+ *    llamalo "Overcomers" y pegá este código ahí. Todos los nombres internos
+ *    llevan el prefijo "ovc"/"Overcomers" para no chocar con otros archivos.
  *    Guardá con Ctrl+S (o el ícono de disquete).
  *
- * 4. Verificá las constantes en `CONFIG` más abajo:
+ * 4. Verificá las constantes en `OVERCOMERS_CONFIG` más abajo:
  *    - `MAIN_SHEET_NAME`: debe coincidir con el nombre de la pestaña donde
  *      caen las respuestas del Google Form (por defecto: 'Respuestas de formulario 1').
  *    - `TARGET_COL_INDEX`: 52 corresponde a la columna AZ ("Adjuntar / 附上").
@@ -28,7 +32,7 @@
  *    b) Tipo: "Aplicación web".
  *    c) Descripción: "OVERCOMERS 2027 - Autorizaciones".
  *    d) Ejecutar como: "Yo (tu correo)".
- *    e) Quién tiene acceso: "Cualquier usuario".
+ *    e) Quién tiene acceso: "Cualquier persona" (NO "cualquier persona con cuenta de Google").
  *    f) Hacé clic en "Implementar" y aceptá los permisos de Google Drive y Sheets.
  *    g) Copiá la "URL de la aplicación web" (termina en `/exec`) y pegala en la
  *       constante `APPS_SCRIPT_URL` dentro de `index.html`.
@@ -37,11 +41,11 @@
  *    Implementar > Gestionar implementaciones > Editar (lápiz) > Versión:
  *    "Nueva versión" > Implementar para que los cambios entren en vigencia.
  *
- * 6. CONFIGURAR ACTIVADOR `onFormSubmit` (para vincular firmas previas):
+ * 6. CONFIGURAR ACTIVADOR `onFormSubmitOvercomers` (para vincular firmas previas):
  *    a) En el menú izquierdo de Apps Script, hacé clic en el ícono del reloj
  *       ("Activadores" / Triggers).
  *    b) Hacé clic en "+ Añadir activador" (abajo a la derecha).
- *    c) Función a ejecutar: `onFormSubmit`
+ *    c) Función a ejecutar: `onFormSubmitOvercomers`
  *    d) Implementación: `Principal` (Head)
  *    e) Origen del evento: `De una hoja de cálculo`
  *    f) Tipo de evento: `Al enviarse el formulario`
@@ -50,7 +54,7 @@
  * ============================================================================
  */
 
-const CONFIG = {
+const OVERCOMERS_CONFIG = {
   // Carpeta en Google Drive donde se guardarán todos los PDFs firmados
   FOLDER_NAME: 'Autorizaciones OVERCOMERS 2027',
 
@@ -69,17 +73,6 @@ const CONFIG = {
 };
 
 /**
- * Endpoint GET simple para verificar en el navegador que la Web App está activa.
- */
-function doGet() {
-  return buildJsonResponse({
-    ok: true,
-    service: 'OVERCOMERS 2027 - Autorizaciones IPTA',
-    timestamp: new Date().toISOString()
-  });
-}
-
-/**
  * Endpoint POST invocado por `index.html` al confirmar la firma digital.
  * Recibe JSON con:
  *   - nombreSolicitante
@@ -94,17 +87,17 @@ function doPost(e) {
     lock.waitLock(30000);
 
     if (!e || !e.postData || !e.postData.contents) {
-      return buildJsonResponse({ ok: false, error: 'No se recibieron datos en la solicitud.' });
+      return ovcBuildJsonResponse({ ok: false, error: 'No se recibieron datos en la solicitud.' });
     }
 
     const data = JSON.parse(e.postData.contents);
     const nombreSolicitante = String(data.nombreSolicitante || '').trim();
     const dniRaw = String(data.dniSolicitante || '').trim();
-    const dniLimpio = normalizeDni(dniRaw);
+    const dniLimpio = ovcNormalizeDni(dniRaw);
     const pdfBase64Raw = String(data.pdfBase64 || '').trim();
 
     if (!nombreSolicitante || !dniLimpio || !pdfBase64Raw) {
-      return buildJsonResponse({
+      return ovcBuildJsonResponse({
         ok: false,
         error: 'Faltan campos obligatorios (nombreSolicitante, dniSolicitante o pdfBase64).'
       });
@@ -115,12 +108,12 @@ function doPost(e) {
     const pdfBytes = Utilities.base64Decode(cleanBase64);
 
     // 2. Construir el nombre estándar: Autorizacion_[Nombre]_[DNI].pdf
-    const nombreArchivoLimpio = sanitizeFileNamePart(nombreSolicitante);
+    const nombreArchivoLimpio = ovcSanitizeFileNamePart(nombreSolicitante);
     const finalFileName = 'Autorizacion_' + nombreArchivoLimpio + '_' + dniLimpio + '.pdf';
     const pdfBlob = Utilities.newBlob(pdfBytes, 'application/pdf', finalFileName);
 
     // 3. Guardar en la carpeta "Autorizaciones OVERCOMERS 2027" en Google Drive
-    const folder = getOrCreateFolder(CONFIG.FOLDER_NAME);
+    const folder = ovcGetOrCreateFolder(OVERCOMERS_CONFIG.FOLDER_NAME);
     const file = folder.createFile(pdfBlob);
 
     // Configurar permisos de lectura mediante enlace
@@ -129,22 +122,22 @@ function doPost(e) {
 
     // 4. Buscar la fila del inscripto en la hoja principal de respuestas
     const ss = SpreadsheetApp.getActiveSpreadsheet();
-    const mainSheet = getMainResponsesSheet(ss);
-    const dniColIndex = findDniColumnIndex(mainSheet);
+    const mainSheet = ovcGetMainResponsesSheet(ss);
+    const dniColIndex = ovcFindDniColumnIndex(mainSheet);
 
     let matchedRow = -1;
     if (dniColIndex > 0) {
-      matchedRow = findRowByDni(mainSheet, dniColIndex, dniLimpio);
+      matchedRow = ovcFindRowByDni(mainSheet, dniColIndex, dniLimpio);
     }
 
     if (matchedRow > 0) {
       // Escribir el enlace directo de Drive en la columna AZ (columna 52)
-      mainSheet.getRange(matchedRow, CONFIG.TARGET_COL_INDEX).setValue(driveUrl);
+      mainSheet.getRange(matchedRow, OVERCOMERS_CONFIG.TARGET_COL_INDEX).setValue(driveUrl);
 
       // Si existía algún registro previo en Firmas_Pendientes para este DNI, marcarlo como Vinculado
-      markPendingAsLinkedIfExists(ss, dniLimpio);
+      ovcMarkPendingAsLinkedIfExists(ss, dniLimpio);
 
-      return buildJsonResponse({
+      return ovcBuildJsonResponse({
         ok: true,
         status: 'linked',
         matchedRow: matchedRow,
@@ -153,7 +146,7 @@ function doPost(e) {
       });
     } else {
       // 5. El participante firmó ANTES de enviar el Google Form -> guardar en Firmas_Pendientes
-      const pendingSheet = getOrCreatePendingSheet(ss);
+      const pendingSheet = ovcGetOrCreatePendingSheet(ss);
       pendingSheet.appendRow([
         new Date(),
         nombreSolicitante,
@@ -162,7 +155,7 @@ function doPost(e) {
         'Pendiente'
       ]);
 
-      return buildJsonResponse({
+      return ovcBuildJsonResponse({
         ok: true,
         status: 'pending',
         fileName: finalFileName,
@@ -170,7 +163,7 @@ function doPost(e) {
       });
     }
   } catch (err) {
-    return buildJsonResponse({
+    return ovcBuildJsonResponse({
       ok: false,
       error: err && err.message ? err.message : String(err)
     });
@@ -187,27 +180,27 @@ function doPost(e) {
  * tenía una firma guardada en `Firmas_Pendientes`. Si coincide, pega el enlace
  * de Google Drive en la columna AZ (columna 52) y la marca como "Vinculado".
  */
-function onFormSubmit(e) {
+function onFormSubmitOvercomers(e) {
   const lock = LockService.getScriptLock();
   try {
     lock.waitLock(30000);
 
     const ss = SpreadsheetApp.getActiveSpreadsheet();
-    const pendingSheet = ss.getSheetByName(CONFIG.PENDING_SHEET_NAME);
+    const pendingSheet = ss.getSheetByName(OVERCOMERS_CONFIG.PENDING_SHEET_NAME);
     if (!pendingSheet || pendingSheet.getLastRow() < 2) {
       return; // No hay firmas pendientes por vincular
     }
 
     // Determinar hoja y fila recién ingresada
-    const targetSheet = (e && e.range) ? e.range.getSheet() : getMainResponsesSheet(ss);
+    const targetSheet = (e && e.range) ? e.range.getSheet() : ovcGetMainResponsesSheet(ss);
     const newRow = (e && e.range) ? e.range.getRow() : targetSheet.getLastRow();
     if (!targetSheet || newRow < 2) return;
 
-    const dniColIndex = findDniColumnIndex(targetSheet);
+    const dniColIndex = ovcFindDniColumnIndex(targetSheet);
     if (dniColIndex <= 0) return;
 
     const submittedDniRaw = targetSheet.getRange(newRow, dniColIndex).getValue();
-    const submittedDni = normalizeDni(submittedDniRaw);
+    const submittedDni = ovcNormalizeDni(submittedDniRaw);
     if (!submittedDni) return;
 
     // Buscar en Firmas_Pendientes (de abajo hacia arriba para tomar la firma más reciente)
@@ -216,13 +209,13 @@ function onFormSubmit(e) {
     // Columnas: [0] Fecha, [1] Nombre, [2] DNI, [3] URL_Drive, [4] Estado
 
     for (let i = pendingValues.length - 1; i >= 0; i--) {
-      const pendingDni = normalizeDni(pendingValues[i][2]);
+      const pendingDni = ovcNormalizeDni(pendingValues[i][2]);
       const driveUrl = String(pendingValues[i][3] || '').trim();
       const estado = String(pendingValues[i][4] || '').trim();
 
       if (pendingDni === submittedDni && driveUrl && estado !== 'Vinculado') {
         // Pegar el enlace de Google Drive en la columna AZ (52) de la nueva fila
-        targetSheet.getRange(newRow, CONFIG.TARGET_COL_INDEX).setValue(driveUrl);
+        targetSheet.getRange(newRow, OVERCOMERS_CONFIG.TARGET_COL_INDEX).setValue(driveUrl);
 
         // Marcar el registro en Firmas_Pendientes como "Vinculado"
         const pendingRowIndex = i + 2;
@@ -244,11 +237,11 @@ function onFormSubmit(e) {
  */
 function sincronizarPendientesManualmente() {
   const ss = SpreadsheetApp.getActiveSpreadsheet();
-  const mainSheet = getMainResponsesSheet(ss);
-  const pendingSheet = ss.getSheetByName(CONFIG.PENDING_SHEET_NAME);
+  const mainSheet = ovcGetMainResponsesSheet(ss);
+  const pendingSheet = ss.getSheetByName(OVERCOMERS_CONFIG.PENDING_SHEET_NAME);
   if (!mainSheet || !pendingSheet || pendingSheet.getLastRow() < 2) return;
 
-  const dniColIndex = findDniColumnIndex(mainSheet);
+  const dniColIndex = ovcFindDniColumnIndex(mainSheet);
   if (dniColIndex <= 0) {
     throw new Error('No se pudo detectar la columna de DNI en ' + mainSheet.getName());
   }
@@ -258,15 +251,15 @@ function sincronizarPendientesManualmente() {
   let vinculados = 0;
 
   for (let i = 0; i < pendingValues.length; i++) {
-    const pendingDni = normalizeDni(pendingValues[i][2]);
+    const pendingDni = ovcNormalizeDni(pendingValues[i][2]);
     const driveUrl = String(pendingValues[i][3] || '').trim();
     const estado = String(pendingValues[i][4] || '').trim();
 
     if (!pendingDni || !driveUrl || estado === 'Vinculado') continue;
 
-    const matchedRow = findRowByDni(mainSheet, dniColIndex, pendingDni);
+    const matchedRow = ovcFindRowByDni(mainSheet, dniColIndex, pendingDni);
     if (matchedRow > 0) {
-      mainSheet.getRange(matchedRow, CONFIG.TARGET_COL_INDEX).setValue(driveUrl);
+      mainSheet.getRange(matchedRow, OVERCOMERS_CONFIG.TARGET_COL_INDEX).setValue(driveUrl);
       pendingSheet.getRange(i + 2, 5).setValue('Vinculado');
       vinculados++;
     }
@@ -279,14 +272,14 @@ function sincronizarPendientesManualmente() {
  * FUNCIONES AUXILIARES INTERNAS
  * ============================================================================ */
 
-function normalizeDni(value) {
+function ovcNormalizeDni(value) {
   return String(value || '')
     .trim()
     .toUpperCase()
     .replace(/[^A-Z0-9]/g, '');
 }
 
-function sanitizeFileNamePart(str) {
+function ovcSanitizeFileNamePart(str) {
   return String(str || '')
     .trim()
     .normalize('NFD')
@@ -297,7 +290,7 @@ function sanitizeFileNamePart(str) {
     .replace(/^_|_$/g, '') || 'Participante';
 }
 
-function getOrCreateFolder(folderName) {
+function ovcGetOrCreateFolder(folderName) {
   const folders = DriveApp.getFoldersByName(folderName);
   if (folders.hasNext()) {
     return folders.next();
@@ -305,23 +298,23 @@ function getOrCreateFolder(folderName) {
   return DriveApp.createFolder(folderName);
 }
 
-function getMainResponsesSheet(ss) {
-  const sheet = ss.getSheetByName(CONFIG.MAIN_SHEET_NAME);
+function ovcGetMainResponsesSheet(ss) {
+  const sheet = ss.getSheetByName(OVERCOMERS_CONFIG.MAIN_SHEET_NAME);
   if (sheet) return sheet;
   // Respaldo: devuelve la primera pestaña que no sea Firmas_Pendientes
   const sheets = ss.getSheets();
   for (let i = 0; i < sheets.length; i++) {
-    if (sheets[i].getName() !== CONFIG.PENDING_SHEET_NAME) {
+    if (sheets[i].getName() !== OVERCOMERS_CONFIG.PENDING_SHEET_NAME) {
       return sheets[i];
     }
   }
   return sheets[0];
 }
 
-function getOrCreatePendingSheet(ss) {
-  let sheet = ss.getSheetByName(CONFIG.PENDING_SHEET_NAME);
+function ovcGetOrCreatePendingSheet(ss) {
+  let sheet = ss.getSheetByName(OVERCOMERS_CONFIG.PENDING_SHEET_NAME);
   if (!sheet) {
-    sheet = ss.insertSheet(CONFIG.PENDING_SHEET_NAME);
+    sheet = ss.insertSheet(OVERCOMERS_CONFIG.PENDING_SHEET_NAME);
     const headers = ['Fecha', 'Nombre', 'DNI', 'URL_Drive', 'Estado'];
     sheet.getRange(1, 1, 1, headers.length).setValues([headers]);
     sheet.getRange(1, 1, 1, headers.length).setFontWeight('bold');
@@ -335,9 +328,9 @@ function getOrCreatePendingSheet(ss) {
  * Prioriza encabezados que contengan DNI/Pasaporte/Documento/身分證/護照
  * evitando columnas que correspondan al padre/madre/tutor.
  */
-function findDniColumnIndex(sheet) {
-  if (CONFIG.DNI_COL_INDEX && CONFIG.DNI_COL_INDEX > 0) {
-    return CONFIG.DNI_COL_INDEX;
+function ovcFindDniColumnIndex(sheet) {
+  if (OVERCOMERS_CONFIG.DNI_COL_INDEX && OVERCOMERS_CONFIG.DNI_COL_INDEX > 0) {
+    return OVERCOMERS_CONFIG.DNI_COL_INDEX;
   }
 
   const lastCol = sheet.getLastColumn();
@@ -379,34 +372,34 @@ function findDniColumnIndex(sheet) {
  * Busca la fila más reciente cuyo DNI coincida (ignorando puntos, espacios o guiones).
  * Retorna el número de fila (1-based) o -1 si no existe.
  */
-function findRowByDni(sheet, dniColIndex, targetDniNormalized) {
+function ovcFindRowByDni(sheet, dniColIndex, targetDniNormalized) {
   const lastRow = sheet.getLastRow();
   if (lastRow < 2) return -1;
 
   const values = sheet.getRange(2, dniColIndex, lastRow - 1, 1).getValues();
   // Recorre de abajo hacia arriba para priorizar la inscripción más reciente si hubo duplicados
   for (let i = values.length - 1; i >= 0; i--) {
-    if (normalizeDni(values[i][0]) === targetDniNormalized) {
+    if (ovcNormalizeDni(values[i][0]) === targetDniNormalized) {
       return i + 2;
     }
   }
   return -1;
 }
 
-function markPendingAsLinkedIfExists(ss, dniLimpio) {
-  const pendingSheet = ss.getSheetByName(CONFIG.PENDING_SHEET_NAME);
+function ovcMarkPendingAsLinkedIfExists(ss, dniLimpio) {
+  const pendingSheet = ss.getSheetByName(OVERCOMERS_CONFIG.PENDING_SHEET_NAME);
   if (!pendingSheet || pendingSheet.getLastRow() < 2) return;
 
   const lastRow = pendingSheet.getLastRow();
   const values = pendingSheet.getRange(2, 1, lastRow - 1, 5).getValues();
   for (let i = 0; i < values.length; i++) {
-    if (normalizeDni(values[i][2]) === dniLimpio && values[i][4] !== 'Vinculado') {
+    if (ovcNormalizeDni(values[i][2]) === dniLimpio && values[i][4] !== 'Vinculado') {
       pendingSheet.getRange(i + 2, 5).setValue('Vinculado');
     }
   }
 }
 
-function buildJsonResponse(obj) {
+function ovcBuildJsonResponse(obj) {
   return ContentService
     .createTextOutput(JSON.stringify(obj))
     .setMimeType(ContentService.MimeType.JSON);
