@@ -66,19 +66,6 @@
       cursor: crosshair;
     }
 
-    /* Scrollbar sutil para lista de normas */
-    .rules-scroll::-webkit-scrollbar {
-      width: 6px;
-    }
-    .rules-scroll::-webkit-scrollbar-track {
-      background: #f1f5f9;
-      border-radius: 9999px;
-    }
-    .rules-scroll::-webkit-scrollbar-thumb {
-      background: #cbd5e1;
-      border-radius: 9999px;
-    }
-
     /* Animación suave al desplegar secciones */
     @keyframes fadeSlideIn {
       from {
@@ -98,128 +85,87 @@
 <body class="bg-slate-50 text-slate-800 min-h-screen font-sans antialiased selection:bg-brand-600 selection:text-white">
 
   <!-- ==================== HEADER INSTITUCIONAL ==================== -->
-  <header class="bg-brand-900 text-white shadow-md sticky top-0 z-30 border-b border-white/10">
-    <div class="max-w-2xl mx-auto px-4 py-3.5 flex items-center justify-between gap-3">
-      <div class="flex items-center gap-3 min-w-0">
-        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-400 to-amber-600 text-brand-900 font-extrabold text-sm flex items-center justify-center shadow-inner shrink-0 tracking-tight">
-          2027
-        </div>
-        <div class="min-w-0">
-          <p class="text-[11px] uppercase tracking-wider text-amber-300/95 font-semibold truncate">
-            IPTA · Campamento de Verano 2027
-          </p>
-          <h1 class="text-base sm:text-lg font-bold tracking-tight text-white leading-tight truncate">
-            OVERCOMERS <span class="font-medium text-slate-300 text-sm">「得勝者」</span>
-          </h1>
-        </div>
-      </div>
-      <div class="shrink-0 text-right hidden sm:block">
-        <span class="inline-flex items-center gap-1.5 text-xs font-medium bg-white/10 text-slate-100 px-2.5 py-1 rounded-full border border-white/15">
-          <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
-          Firma Digital · 線上簽署
-        </span>
-      </div>
+  <header class="bg-brand-900 text-white">
+    <div class="max-w-xl mx-auto px-4 py-4 text-center">
+      <p class="text-[11px] uppercase tracking-wider text-amber-300 font-semibold">IPTA · Campamento de Verano 2027</p>
+      <h1 class="text-xl sm:text-2xl font-extrabold tracking-tight leading-tight">
+        OVERCOMERS <span class="font-medium text-slate-300 text-base">「得勝者」</span>
+      </h1>
     </div>
   </header>
 
   <!-- ==================== CONTENIDO PRINCIPAL ==================== -->
-  <main class="max-w-2xl mx-auto px-4 py-6 pb-20">
+  <main class="max-w-xl mx-auto px-4 py-5 pb-20">
 
-    <!-- Subtítulo introductorio -->
-    <section id="introBanner" class="mb-6 bg-white rounded-2xl border border-slate-200/90 p-4 sm:p-5 shadow-sm">
-      <div class="flex items-start gap-3">
-        <div class="w-9 h-9 rounded-lg bg-brand-50 text-brand-700 flex items-center justify-center shrink-0 mt-0.5">
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-          </svg>
+    <!-- Introducción: Parte 1 (firma) y Parte 2 (formulario) -->
+    <section id="introBanner" class="mb-5 bg-white rounded-2xl border border-slate-200 p-4 sm:p-5 shadow-sm">
+      <h2 class="text-lg sm:text-xl font-extrabold text-slate-900 leading-tight">Firma de normas y autorización</h2>
+      <p class="text-sm text-slate-500">規則同意書與授權書</p>
+
+      <div class="mt-4 grid grid-cols-2 gap-2 text-center">
+        <div class="rounded-xl bg-brand-700 text-white p-3">
+          <p class="text-[11px] font-bold uppercase tracking-wide text-amber-300">Parte 1 de 2 · 第一部分</p>
+          <p class="text-sm font-bold leading-tight mt-1">Firmar acá</p>
+          <p class="text-[11px] text-slate-300">在此簽名</p>
         </div>
-        <div>
-          <h2 class="text-sm sm:text-base font-bold text-slate-900 leading-snug">
-            Aceptación de Normas y Autorización
-          </h2>
-          <p class="text-xs sm:text-sm text-slate-500 mt-0.5">
-            阿根廷基督長老教會 (IPTA) 2027年夏令營「得勝者」規則同意書與授權書
-          </p>
-          <p class="text-xs text-slate-500 mt-2 leading-relaxed">
-            Completá los pasos y firmá con tu dedo o mouse. El documento PDF se enviará automáticamente a la Coordinación.
-            <span class="block text-slate-400 mt-0.5">請依序完成以下步驟並親筆簽名，系統將自動產生 PDF 並傳送至大會。</span>
-          </p>
-          <div class="mt-3 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2 text-xs text-amber-900 leading-relaxed">
-            <strong>Paso 1 de 2:</strong> firmá acá las normas. Al terminar, un botón te lleva al <strong>formulario de inscripción</strong> (paso 2) con tus datos ya cargados.
-            <span class="block text-amber-800/80 mt-0.5">第 1 步（共 2 步）：在此簽署規則。完成後，按鈕會帶你前往<strong>報名表</strong>（第 2 步），你的資料將自動填入。</span>
-          </div>
+        <div class="rounded-xl bg-slate-100 border border-slate-200 p-3">
+          <p class="text-[11px] font-bold uppercase tracking-wide text-slate-500">Parte 2 de 2 · 第二部分</p>
+          <p class="text-sm font-bold leading-tight mt-1 text-slate-700">Formulario de inscripción</p>
+          <p class="text-[11px] text-slate-500">填寫報名表</p>
         </div>
       </div>
+
+      <p class="mt-3 text-sm text-slate-600 leading-relaxed">
+        Completá los pasos de abajo <strong>en orden</strong>. Al final, un botón te lleva al formulario de inscripción.
+        <span class="block text-xs text-slate-400 mt-0.5">請依序完成以下步驟，最後按鈕會帶你前往報名表。</span>
+      </p>
     </section>
 
     <!-- ==================== FORMULARIO PRINCIPAL ==================== -->
-    <form id="authorizationForm" class="space-y-5" novalidate>
+    <form id="authorizationForm" class="space-y-4" novalidate>
 
-      <!-- ========== PASO 1: LECTURA DE NORMAS GENERALES ========== -->
-      <section id="step1Card" class="bg-white rounded-2xl border border-slate-200/90 shadow-sm overflow-hidden">
-        <div class="px-4 sm:px-5 pt-4 pb-3 border-b border-slate-100 flex items-center justify-between gap-2">
-          <div class="flex items-center gap-2.5">
-            <span class="w-7 h-7 rounded-full bg-brand-700 text-white text-xs font-bold flex items-center justify-center shrink-0">1</span>
-            <div>
-              <h3 class="text-sm sm:text-base font-bold text-slate-900">Normas Generales</h3>
-              <p class="text-xs text-slate-500">營會一般規則（共 13 條）</p>
-            </div>
-          </div>
-          <button
-            type="button"
-            id="toggleRulesBtn"
-            aria-expanded="true"
-            aria-controls="rulesAccordionPanel"
-            class="inline-flex items-center gap-1.5 text-xs font-semibold text-brand-700 bg-brand-50 hover:bg-brand-100 px-3 py-1.5 rounded-lg transition-colors"
-          >
-            <span id="toggleRulesLabel">Ocultar / 收合</span>
-            <svg id="toggleRulesIcon" class="w-4 h-4 transition-transform duration-200 rotate-180" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
-            </svg>
-          </button>
-        </div>
-
-        <!-- Acordeón desplegable con las 13 normas -->
-        <div id="rulesAccordionPanel" class="border-b border-slate-100">
-          <div class="rules-scroll max-h-[420px] overflow-y-auto px-4 sm:px-5 py-3 divide-y divide-slate-100 bg-slate-50/50">
-            <ol id="rulesList" class="space-y-0 divide-y divide-slate-200/70"></ol>
+      <!-- ========== PASO 1: NORMAS GENERALES ========== -->
+      <section id="step1Card" class="bg-white rounded-2xl border border-slate-200 shadow-sm p-4 sm:p-5">
+        <div class="flex items-center gap-3 mb-3">
+          <span class="w-9 h-9 rounded-full bg-brand-700 text-white text-base font-extrabold flex items-center justify-center shrink-0">1</span>
+          <div>
+            <h3 class="text-base sm:text-lg font-bold text-slate-900 leading-tight">Leé las normas</h3>
+            <p class="text-xs text-slate-500">閱讀營會規則（共 13 條）</p>
           </div>
         </div>
 
-        <!-- Checkbox de aceptación obligatoria -->
-        <div class="p-4 sm:p-5 bg-white">
-          <label
-            for="acceptRulesCheckbox"
-            id="acceptRulesContainer"
-            class="flex items-start gap-3 p-3.5 rounded-xl border-2 border-slate-200 bg-slate-50/70 hover:border-brand-500/60 cursor-pointer transition-all select-none"
-          >
-            <input
-              type="checkbox"
-              id="acceptRulesCheckbox"
-              class="mt-0.5 w-5 h-5 rounded border-slate-300 text-brand-700 focus:ring-brand-500 shrink-0 cursor-pointer accent-brand-700"
-            />
-            <span class="text-sm font-semibold text-slate-800 leading-snug">
-              Leí y acepto las 13 Normas Generales
-              <span class="block text-xs font-medium text-slate-600 mt-0.5">我已閱讀並同意以上規則</span>
-            </span>
-          </label>
-          <p id="errAcceptRules" class="hidden text-xs font-medium text-rose-600 mt-2">
-            Debés leer y aceptar las 13 Normas Generales para continuar. / 請先閱讀並勾選同意以上13條規則。
-          </p>
-        </div>
+        <!-- Las 13 normas (sin scroll propio: se baja con la página) -->
+        <ol id="rulesList" class="divide-y divide-slate-100 border-y border-slate-100"></ol>
+
+        <label
+          for="acceptRulesCheckbox"
+          id="acceptRulesContainer"
+          class="mt-4 flex items-center gap-3 p-4 rounded-xl border-2 border-slate-200 bg-slate-50/70 cursor-pointer transition-all select-none"
+        >
+          <input
+            type="checkbox"
+            id="acceptRulesCheckbox"
+            class="w-6 h-6 shrink-0 cursor-pointer accent-brand-700"
+          />
+          <span class="text-base font-bold text-slate-900 leading-snug">
+            Leí y acepto las normas
+            <span class="block text-xs font-medium text-slate-500 mt-0.5">我已閱讀並同意以上規則</span>
+          </span>
+        </label>
+        <p id="errAcceptRules" class="hidden text-sm font-medium text-rose-600 mt-2">
+          Marcá la casilla para aceptar las normas. / 請勾選同意規則。
+        </p>
       </section>
 
-      <!-- ========== PASO 2: SELECTOR DE EDAD AL 25/01/2027 ========== -->
-      <section id="step2Card" class="bg-white rounded-2xl border border-slate-200/90 shadow-sm p-4 sm:p-5">
-        <div class="flex items-start gap-2.5 mb-4">
-          <span class="w-7 h-7 rounded-full bg-brand-700 text-white text-xs font-bold flex items-center justify-center shrink-0 mt-0.5">2</span>
+      <!-- ========== PASO 2: EDAD AL 25/01/2027 ========== -->
+      <section id="step2Card" class="bg-white rounded-2xl border border-slate-200 shadow-sm p-4 sm:p-5">
+        <div class="flex items-start gap-3 mb-4">
+          <span class="w-9 h-9 rounded-full bg-brand-700 text-white text-base font-extrabold flex items-center justify-center shrink-0">2</span>
           <div>
-            <h3 class="text-sm sm:text-base font-bold text-slate-900 leading-snug">
-              ¿Al momento de iniciar el campamento (25 de enero de 2027), serás mayor de 18 años?
+            <h3 class="text-base sm:text-lg font-bold text-slate-900 leading-tight">
+              El 25 de enero de 2027, ¿vas a tener 18 años o más?
             </h3>
-            <p class="text-xs sm:text-sm text-slate-600 mt-1">
-              在營會開始時（2027年1月25日）你是否已滿 18 歲
-            </p>
+            <p class="text-xs text-slate-500 mt-0.5">2027年1月25日營會開始時，你是否已滿 18 歲？</p>
           </div>
         </div>
 
@@ -228,14 +174,14 @@
             type="button"
             id="btnMayor"
             data-age="adult"
-            class="age-option-btn group relative flex items-center justify-between gap-3 p-4 rounded-xl border-2 border-slate-200 bg-white hover:border-brand-500 text-left transition-all"
+            class="age-option-btn flex items-center justify-between gap-3 p-4 rounded-xl border-2 border-slate-200 bg-white text-left transition-all"
           >
             <div>
-              <div class="text-sm sm:text-base font-bold text-slate-900">Sí, soy mayor de 18 años</div>
-              <div class="text-xs sm:text-sm font-medium text-slate-500 mt-0.5">是（已滿 18 歲）</div>
+              <div class="text-base font-bold text-slate-900">Sí, 18 o más</div>
+              <div class="text-xs font-medium text-slate-500 mt-0.5">是（已滿 18 歲）</div>
             </div>
-            <div class="age-radio-dot w-6 h-6 rounded-full border-2 border-slate-300 flex items-center justify-center shrink-0 transition-colors">
-              <svg class="w-3.5 h-3.5 text-white hidden" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24">
+            <div class="age-radio-dot w-7 h-7 rounded-full border-2 border-slate-300 flex items-center justify-center shrink-0 transition-colors">
+              <svg class="w-4 h-4 text-white hidden" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
               </svg>
             </div>
@@ -245,304 +191,245 @@
             type="button"
             id="btnMenor"
             data-age="minor"
-            class="age-option-btn group relative flex items-center justify-between gap-3 p-4 rounded-xl border-2 border-slate-200 bg-white hover:border-brand-500 text-left transition-all"
+            class="age-option-btn flex items-center justify-between gap-3 p-4 rounded-xl border-2 border-slate-200 bg-white text-left transition-all"
           >
             <div>
-              <div class="text-sm sm:text-base font-bold text-slate-900">No, soy menor de 18 años</div>
-              <div class="text-xs sm:text-sm font-medium text-slate-500 mt-0.5">否（未滿 18 歲）</div>
+              <div class="text-base font-bold text-slate-900">No, menos de 18</div>
+              <div class="text-xs font-medium text-slate-500 mt-0.5">否（未滿 18 歲）</div>
+              <div class="text-xs text-amber-700 mt-1">También firma tu padre, madre o tutor · 需父母或監護人簽名</div>
             </div>
-            <div class="age-radio-dot w-6 h-6 rounded-full border-2 border-slate-300 flex items-center justify-center shrink-0 transition-colors">
-              <svg class="w-3.5 h-3.5 text-white hidden" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24">
+            <div class="age-radio-dot w-7 h-7 rounded-full border-2 border-slate-300 flex items-center justify-center shrink-0 transition-colors">
+              <svg class="w-4 h-4 text-white hidden" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
               </svg>
             </div>
           </button>
         </div>
 
-        <p id="errAgeChoice" class="hidden text-xs font-medium text-rose-600 mt-2.5">
-          Seleccioná una opción para indicar si serás mayor o menor de 18 años. / 請選擇你在營會開始時是否已滿 18 歲。
+        <p id="errAgeChoice" class="hidden text-sm font-medium text-rose-600 mt-2.5">
+          Elegí una de las dos opciones. / 請選擇一個選項。
         </p>
       </section>
 
-      <!-- ========== PASO 3: FORMULARIO Y PANELES DE FIRMA TÁCTIL ========== -->
-      <section id="step3Section" class="space-y-5">
-
-        <!-- BLOQUE A: SOLICITANTE (PARA TODOS) -->
-        <div id="blockACard" class="bg-white rounded-2xl border border-slate-200/90 shadow-sm p-4 sm:p-5 space-y-4">
-          <div class="flex items-center gap-2.5 pb-3 border-b border-slate-100">
-            <span class="w-7 h-7 rounded-full bg-brand-700 text-white text-xs font-bold flex items-center justify-center shrink-0">3</span>
-            <div>
-              <h3 class="text-sm sm:text-base font-bold text-slate-900">Datos y Firma del Solicitante</h3>
-              <p class="text-xs text-slate-500">參加者資料與簽名</p>
-            </div>
-          </div>
-
-          <!-- Texto legal Bloque A -->
-          <div class="bg-brand-50/70 border border-brand-200/70 rounded-xl p-3.5 text-xs sm:text-sm leading-relaxed text-slate-800 space-y-1.5">
-            <p class="font-medium">
-              Con la siguiente firma declaro mi aceptación y cumplimiento de las NORMAS GENERALES. Declaro bajo mi responsabilidad mi comportamiento durante el Campamento de Verano 2027 "OVERCOMERS".
-            </p>
-            <p class="text-slate-600">
-              以下簽名代表我願意遵守大會及場地規則,並在2027年夏令營「得勝者」期間對自己的舉止負責。
-            </p>
-          </div>
-
-          <!-- Campos Bloque A -->
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
-              <label for="apellidoSolicitante" class="block text-xs sm:text-sm font-semibold text-slate-700 mb-1.5">
-                Apellido <span class="text-slate-500 font-normal">/ 姓</span> <span class="text-rose-500">*</span>
-              </label>
-              <input
-                type="text"
-                id="apellidoSolicitante"
-                name="apellidoSolicitante"
-                autocomplete="family-name"
-                placeholder="Ej: Pérez"
-                class="w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-slate-900 placeholder:text-slate-400 focus:border-brand-600 focus:ring-2 focus:ring-brand-500/20 outline-none transition-all"
-              />
-              <p class="text-[11px] text-slate-400 mt-1">
-                Como figura en el DNI · 按照身分證填寫
-              </p>
-            </div>
-
-            <div>
-              <label for="nombrePilaSolicitante" class="block text-xs sm:text-sm font-semibold text-slate-700 mb-1.5">
-                Nombre <span class="text-slate-500 font-normal">/ 名</span> <span class="text-rose-500">*</span>
-              </label>
-              <input
-                type="text"
-                id="nombrePilaSolicitante"
-                name="nombrePilaSolicitante"
-                autocomplete="given-name"
-                placeholder="Ej: Juan"
-                class="w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-slate-900 placeholder:text-slate-400 focus:border-brand-600 focus:ring-2 focus:ring-brand-500/20 outline-none transition-all"
-              />
-              <p class="text-[11px] text-slate-400 mt-1">
-                Como figura en el DNI · 按照身分證填寫
-              </p>
-            </div>
-
-            <p id="errNombreSolicitante" class="hidden sm:col-span-2 -mt-2 text-xs font-medium text-rose-600">
-              Ingresá tu apellido y tu nombre. / 請輸入姓和名。
-            </p>
-
-            <div>
-              <label for="dniSolicitante" class="block text-xs sm:text-sm font-semibold text-slate-700 mb-1.5">
-                DNI o Pasaporte <span class="text-slate-500 font-normal">/ 身分證/護照號碼</span> <span class="text-rose-500">*</span>
-              </label>
-              <input
-                type="text"
-                id="dniSolicitante"
-                name="dniSolicitante"
-                inputmode="text"
-                autocomplete="off"
-                placeholder="Ej: 40123456"
-                class="w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-slate-900 uppercase placeholder:normal-case placeholder:text-slate-400 focus:border-brand-600 focus:ring-2 focus:ring-brand-500/20 outline-none transition-all"
-              />
-              <p class="text-[11px] text-slate-400 mt-1">
-                Sin puntos, espacios ni guiones · 請勿輸入點、空格或符號
-              </p>
-              <p id="errDniSolicitante" class="hidden text-xs font-medium text-rose-600 mt-1">
-                Ingresá un DNI o Pasaporte válido. / 請輸入有效的身分證或護照號碼。
-              </p>
-            </div>
-          </div>
-
-          <!-- Canvas de Firma Solicitante -->
-          <div class="pt-1">
-            <div class="flex items-center justify-between gap-2 mb-1.5">
-              <label class="text-xs sm:text-sm font-semibold text-slate-700">
-                Firma del Solicitante <span class="text-slate-500 font-normal">/ 參加者簽名</span> <span class="text-rose-500">*</span>
-              </label>
-              <button
-                type="button"
-                id="clearSigSolicitante"
-                class="inline-flex items-center gap-1 text-xs font-semibold text-slate-600 hover:text-rose-600 bg-slate-100 hover:bg-rose-50 px-2.5 py-1.5 rounded-lg transition-colors"
-              >
-                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                </svg>
-                Borrar firma / 清除簽名
-              </button>
-            </div>
-
-            <div id="sigSolicitanteBox" class="relative rounded-xl border-2 border-dashed border-slate-300 bg-white overflow-hidden transition-colors">
-              <div id="sigSolicitantePlaceholder" class="pointer-events-none absolute inset-0 flex flex-col items-center justify-center text-slate-300 select-none px-4 text-center">
-                <svg class="w-7 h-7 mb-1 opacity-70" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931z" />
-                </svg>
-                <span class="text-xs font-medium text-slate-400">Firmá aquí con el dedo o mouse · 請在此處簽名</span>
-              </div>
-              <!-- Línea guía visual (no se guarda en la imagen PNG transparente) -->
-              <div class="pointer-events-none absolute left-6 right-6 bottom-7 border-b border-slate-200"></div>
-              <canvas id="canvasSolicitante" class="signature-canvas block w-full h-44 sm:h-48"></canvas>
-            </div>
-            <p id="errSigSolicitante" class="hidden text-xs font-medium text-rose-600 mt-1.5">
-              Falta la firma del solicitante. / 請完成參加者簽名。
-            </p>
+      <!-- ========== PASO 3: DATOS DEL ACAMPANTE ========== -->
+      <section id="step3Section" class="bg-white rounded-2xl border border-slate-200 shadow-sm p-4 sm:p-5">
+        <div class="flex items-center gap-3 mb-4">
+          <span class="w-9 h-9 rounded-full bg-brand-700 text-white text-base font-extrabold flex items-center justify-center shrink-0">3</span>
+          <div>
+            <h3 class="text-base sm:text-lg font-bold text-slate-900 leading-tight">Tus datos</h3>
+            <p class="text-xs text-slate-500">參加者資料 · Como figura en el DNI / 按照身分證填寫</p>
           </div>
         </div>
 
-        <!-- BLOQUE B: AUTORIZACIÓN DE PADRE, MADRE O TUTOR (SOLO MENORES DE 18) -->
-        <div id="blockBCard" class="hidden animate-fade-in bg-white rounded-2xl border-2 border-amber-300/80 shadow-sm p-4 sm:p-5 space-y-4">
-          <div class="flex items-start gap-2.5 pb-3 border-b border-amber-100">
-            <span class="w-7 h-7 rounded-full bg-amber-500 text-white text-xs font-bold flex items-center justify-center shrink-0 mt-0.5">B</span>
-            <div>
-              <h3 class="text-sm sm:text-base font-bold text-slate-900 leading-snug">
-                AUTORIZACIÓN DEL PADRE, MADRE O TUTOR (para menores de 18 años)
-              </h3>
-              <p class="text-xs sm:text-sm font-medium text-amber-800 mt-0.5">
-                父母或監護人同意書(未滿18歲者):
-              </p>
-            </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label for="apellidoSolicitante" class="block text-sm font-semibold text-slate-700 mb-1.5">
+              Apellido <span class="text-slate-400 font-normal">/ 姓</span>
+            </label>
+            <input
+              type="text"
+              id="apellidoSolicitante"
+              name="apellidoSolicitante"
+              autocomplete="family-name"
+              placeholder="Ej: Pérez"
+              class="w-full rounded-xl border-2 border-slate-300 bg-white px-3.5 py-3 text-slate-900 placeholder:text-slate-400 focus:border-brand-600 outline-none transition-all"
+            />
           </div>
 
-          <!-- Campos Tutor -->
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
-              <label for="nombreTutor" class="block text-xs sm:text-sm font-semibold text-slate-700 mb-1.5">
-                Nombre y Apellido del Padre, Madre o Tutor <span class="text-slate-500 font-normal">/ 父母或監護人姓名</span> <span class="text-rose-500">*</span>
-              </label>
-              <input
-                type="text"
-                id="nombreTutor"
-                name="nombreTutor"
-                autocomplete="name"
-                placeholder="Ej: María Gómez"
-                class="w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-slate-900 placeholder:text-slate-400 focus:border-brand-600 focus:ring-2 focus:ring-brand-500/20 outline-none transition-all"
-              />
-              <p id="errNombreTutor" class="hidden text-xs font-medium text-rose-600 mt-1">
-                Ingresá el nombre y apellido del padre, madre o tutor. / 請輸入父母或監護人姓名。
-              </p>
-            </div>
-
-            <div>
-              <label for="dniTutor" class="block text-xs sm:text-sm font-semibold text-slate-700 mb-1.5">
-                DNI o Pasaporte del Padre, Madre o Tutor <span class="text-slate-500 font-normal">/ 父母或監護人身分證/護照號碼</span> <span class="text-rose-500">*</span>
-              </label>
-              <input
-                type="text"
-                id="dniTutor"
-                name="dniTutor"
-                inputmode="text"
-                autocomplete="off"
-                placeholder="Ej: 25123456"
-                class="w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-slate-900 uppercase placeholder:normal-case placeholder:text-slate-400 focus:border-brand-600 focus:ring-2 focus:ring-brand-500/20 outline-none transition-all"
-              />
-              <p class="text-[11px] text-slate-400 mt-1">
-                Sin puntos, espacios ni guiones · 請勿輸入點、空格或符號
-              </p>
-              <p id="errDniTutor" class="hidden text-xs font-medium text-rose-600 mt-1">
-                Ingresá un DNI o Pasaporte válido del adulto responsable. / 請輸入有效的父母或監護人身分證或護照號碼。
-              </p>
-            </div>
+          <div>
+            <label for="nombrePilaSolicitante" class="block text-sm font-semibold text-slate-700 mb-1.5">
+              Nombre <span class="text-slate-400 font-normal">/ 名</span>
+            </label>
+            <input
+              type="text"
+              id="nombrePilaSolicitante"
+              name="nombrePilaSolicitante"
+              autocomplete="given-name"
+              placeholder="Ej: Juan"
+              class="w-full rounded-xl border-2 border-slate-300 bg-white px-3.5 py-3 text-slate-900 placeholder:text-slate-400 focus:border-brand-600 outline-none transition-all"
+            />
           </div>
 
-          <!-- Cláusula dinámica con datos del menor y tutor -->
-          <div class="bg-amber-50/75 border border-amber-200/80 rounded-xl p-3.5 text-xs sm:text-sm leading-relaxed text-slate-800 space-y-2">
-            <p>
-              Yo, <strong id="dynTutorNameEs" class="text-brand-800 underline decoration-amber-400/80 underline-offset-2">[Nombre del Padre, Madre o Tutor]</strong>,
-              DNI/Pasaporte N.º <strong id="dynTutorDniEs" class="text-brand-800 underline decoration-amber-400/80 underline-offset-2">[DNI/Pasaporte]</strong>,
-              en carácter de padre, madre o tutor legal de
-              <strong id="dynMinorNameEs" class="text-brand-800 underline decoration-amber-400/80 underline-offset-2">[Nombre del Menor]</strong>,
-              DNI/Pasaporte N.º <strong id="dynMinorDniEs" class="text-brand-800 underline decoration-amber-400/80 underline-offset-2">[DNI/Pasaporte del Menor]</strong>,
-              autorizo su participación en el Campamento de Verano 2027 "OVERCOMERS" de la Iglesia Presbiteriana de Taiwán en Argentina (IPTA), declaro haber leído y aceptado las NORMAS GENERALES y asumo plena responsabilidad por su comportamiento y seguridad.
-            </p>
-            <p class="text-slate-600">
-              本人 <strong id="dynTutorNameZh" class="text-brand-800">[父母或監護人姓名]</strong>（身分證/護照號碼：<strong id="dynTutorDniZh" class="text-brand-800">[證件號碼]</strong>），身為未成年參加者
-              <strong id="dynMinorNameZh" class="text-brand-800">[參加者姓名]</strong>（身分證/護照號碼：<strong id="dynMinorDniZh" class="text-brand-800">[參加者證件號碼]</strong>）之父母或監護人，茲同意其參加阿根廷基督長老教會(IPTA)2027年夏令營「得勝者」，並聲明已閱讀及同意上述一般規則，願對其舉止及安全負全責。
-            </p>
-          </div>
+          <p id="errNombreSolicitante" class="hidden sm:col-span-2 -mt-2 text-sm font-medium text-rose-600">
+            Escribí tu apellido y tu nombre. / 請輸入姓和名。
+          </p>
 
-          <!-- Canvas de Firma Tutor -->
-          <div class="pt-1">
-            <div class="flex items-center justify-between gap-2 mb-1.5">
-              <label class="text-xs sm:text-sm font-semibold text-slate-700">
-                Firma del Padre, Madre o Tutor <span class="text-slate-500 font-normal">/ 父母或監護人簽名</span> <span class="text-rose-500">*</span>
-              </label>
-              <button
-                type="button"
-                id="clearSigTutor"
-                class="inline-flex items-center gap-1 text-xs font-semibold text-slate-600 hover:text-rose-600 bg-slate-100 hover:bg-rose-50 px-2.5 py-1.5 rounded-lg transition-colors"
-              >
-                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                </svg>
-                Borrar firma / 清除簽名
-              </button>
-            </div>
-
-            <div id="sigTutorBox" class="relative rounded-xl border-2 border-dashed border-amber-300 bg-white overflow-hidden transition-colors">
-              <div id="sigTutorPlaceholder" class="pointer-events-none absolute inset-0 flex flex-col items-center justify-center text-slate-300 select-none px-4 text-center">
-                <svg class="w-7 h-7 mb-1 opacity-70" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931z" />
-                </svg>
-                <span class="text-xs font-medium text-slate-400">Firma del adulto responsable · 請父母或監護人在此簽名</span>
-              </div>
-              <div class="pointer-events-none absolute left-6 right-6 bottom-7 border-b border-slate-200"></div>
-              <canvas id="canvasTutor" class="signature-canvas block w-full h-44 sm:h-48"></canvas>
-            </div>
-            <p id="errSigTutor" class="hidden text-xs font-medium text-rose-600 mt-1.5">
-              Falta la firma del padre, madre o tutor. / 請完成父母或監護人簽名。
+          <div class="sm:col-span-2">
+            <label for="dniSolicitante" class="block text-sm font-semibold text-slate-700 mb-1.5">
+              N° de DNI o Pasaporte <span class="text-slate-400 font-normal">/ 身分證或護照號碼</span>
+            </label>
+            <input
+              type="text"
+              id="dniSolicitante"
+              name="dniSolicitante"
+              inputmode="text"
+              autocomplete="off"
+              placeholder="Ej: 40123456"
+              class="w-full rounded-xl border-2 border-slate-300 bg-white px-3.5 py-3 text-slate-900 uppercase placeholder:normal-case placeholder:text-slate-400 focus:border-brand-600 outline-none transition-all"
+            />
+            <p class="text-xs text-slate-400 mt-1">Solo números, sin puntos · 只填數字，不加點號</p>
+            <p id="errDniSolicitante" class="hidden text-sm font-medium text-rose-600 mt-1">
+              Revisá el número de DNI o Pasaporte. / 請確認身分證或護照號碼。
             </p>
           </div>
         </div>
-
-        <!-- BLOQUE C: CLÁUSULA DE IMAGEN (PARA TODOS) -->
-        <div class="bg-slate-900 text-slate-100 rounded-2xl p-4 sm:p-5 shadow-sm border border-slate-800">
-          <div class="flex items-start gap-3">
-            <div class="w-8 h-8 rounded-lg bg-amber-400/15 text-amber-300 flex items-center justify-center shrink-0 mt-0.5">
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
-                <path stroke-linecap="round" stroke-linejoin="round" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
-              </svg>
-            </div>
-            <div class="space-y-1.5 text-xs sm:text-sm leading-relaxed">
-              <p class="font-bold text-amber-300 tracking-wide uppercase text-xs">
-                IMPORTANTE / 注意事項
-              </p>
-              <p class="text-slate-100">
-                Durante el campamento se tomarán fotografías y videos de los participantes por parte de la Coordinación. Por la presente se autoriza a IPTA/la Coordinación a usar la imagen del acampante en fotografías y videos para fines promocionales.
-              </p>
-              <p class="text-slate-300">
-                營會期間大會將拍攝參加者的照片及影片。本人特此授權IPTA及大會在宣傳用途的照片及影片中使用參加者的肖像。
-              </p>
-            </div>
-          </div>
-        </div>
-
       </section>
+
+      <!-- ========== PASO 4: FIRMA DEL ACAMPANTE ========== -->
+      <section class="bg-white rounded-2xl border border-slate-200 shadow-sm p-4 sm:p-5">
+        <div class="flex items-center gap-3 mb-3">
+          <span class="w-9 h-9 rounded-full bg-brand-700 text-white text-base font-extrabold flex items-center justify-center shrink-0">4</span>
+          <div>
+            <h3 class="text-base sm:text-lg font-bold text-slate-900 leading-tight">Tu firma</h3>
+            <p class="text-xs text-slate-500">參加者簽名</p>
+          </div>
+        </div>
+
+        <p class="text-xs text-slate-600 leading-relaxed mb-3">
+          Con la siguiente firma declaro mi aceptación y cumplimiento de las NORMAS GENERALES. Declaro bajo mi responsabilidad mi comportamiento durante el Campamento de Verano 2027 "OVERCOMERS".
+          <span class="block text-slate-400 mt-0.5">以下簽名代表我願意遵守大會及場地規則，並在2027年夏令營「得勝者」期間對自己的舉止負責。</span>
+        </p>
+
+        <div id="sigSolicitanteBox" class="relative rounded-xl border-2 border-dashed border-slate-300 bg-white overflow-hidden transition-colors">
+          <div id="sigSolicitantePlaceholder" class="pointer-events-none absolute inset-0 flex flex-col items-center justify-center select-none px-4 text-center">
+            <svg class="w-8 h-8 mb-1 text-slate-300" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931z" />
+            </svg>
+            <span class="text-sm font-semibold text-slate-400">Firmá acá con el dedo</span>
+            <span class="text-xs text-slate-400">請用手指在此簽名</span>
+          </div>
+          <div class="pointer-events-none absolute left-6 right-6 bottom-7 border-b border-slate-200"></div>
+          <canvas id="canvasSolicitante" class="signature-canvas block w-full h-48"></canvas>
+        </div>
+        <div class="flex items-center justify-between gap-2 mt-2">
+          <p id="errSigSolicitante" class="hidden text-sm font-medium text-rose-600">Falta tu firma. / 請簽名。</p>
+          <button
+            type="button"
+            id="clearSigSolicitante"
+            class="ml-auto inline-flex items-center gap-1.5 text-sm font-semibold text-slate-600 bg-slate-100 hover:bg-rose-50 hover:text-rose-600 px-3 py-2 rounded-lg transition-colors"
+          >
+            Borrar y firmar de nuevo · 重簽
+          </button>
+        </div>
+      </section>
+
+      <!-- ========== PASO 5: PADRE, MADRE O TUTOR (SOLO MENORES DE 18) ========== -->
+      <section id="blockBCard" class="hidden animate-fade-in bg-white rounded-2xl border-2 border-amber-300 shadow-sm p-4 sm:p-5 space-y-4">
+        <div class="flex items-start gap-3">
+          <span class="w-9 h-9 rounded-full bg-amber-500 text-white text-base font-extrabold flex items-center justify-center shrink-0">5</span>
+          <div>
+            <h3 class="text-base sm:text-lg font-bold text-slate-900 leading-tight">Padre, madre o tutor</h3>
+            <p class="text-xs text-amber-800">Solo para menores de 18 · 父母或監護人（未滿18歲者）</p>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 gap-4">
+          <div>
+            <label for="nombreTutor" class="block text-sm font-semibold text-slate-700 mb-1.5">
+              Nombre y apellido del padre, madre o tutor <span class="text-slate-400 font-normal">/ 父母或監護人姓名</span>
+            </label>
+            <input
+              type="text"
+              id="nombreTutor"
+              name="nombreTutor"
+              autocomplete="off"
+              placeholder="Ej: María Gómez"
+              class="w-full rounded-xl border-2 border-slate-300 bg-white px-3.5 py-3 text-slate-900 placeholder:text-slate-400 focus:border-brand-600 outline-none transition-all"
+            />
+            <p id="errNombreTutor" class="hidden text-sm font-medium text-rose-600 mt-1">
+              Escribí el nombre y apellido del adulto. / 請輸入父母或監護人姓名。
+            </p>
+          </div>
+
+          <div>
+            <label for="dniTutor" class="block text-sm font-semibold text-slate-700 mb-1.5">
+              N° de DNI o Pasaporte del padre, madre o tutor <span class="text-slate-400 font-normal">/ 證件號碼</span>
+            </label>
+            <input
+              type="text"
+              id="dniTutor"
+              name="dniTutor"
+              inputmode="text"
+              autocomplete="off"
+              placeholder="Ej: 25123456"
+              class="w-full rounded-xl border-2 border-slate-300 bg-white px-3.5 py-3 text-slate-900 uppercase placeholder:normal-case placeholder:text-slate-400 focus:border-brand-600 outline-none transition-all"
+            />
+            <p class="text-xs text-slate-400 mt-1">Solo números, sin puntos · 只填數字，不加點號</p>
+            <p id="errDniTutor" class="hidden text-sm font-medium text-rose-600 mt-1">
+              Revisá el número de DNI o Pasaporte del adulto. / 請確認父母或監護人證件號碼。
+            </p>
+          </div>
+        </div>
+
+        <!-- Texto de la autorización (se completa solo con los datos) -->
+        <div class="bg-amber-50 border border-amber-200 rounded-xl p-3.5 text-xs leading-relaxed text-slate-700 space-y-2">
+          <p>
+            Yo, <strong id="dynTutorNameEs" class="text-brand-800">[Nombre del Padre, Madre o Tutor]</strong>,
+            DNI/Pasaporte N.º <strong id="dynTutorDniEs" class="text-brand-800">[DNI/Pasaporte]</strong>,
+            en carácter de padre, madre o tutor legal de
+            <strong id="dynMinorNameEs" class="text-brand-800">[Nombre del Menor]</strong>,
+            DNI/Pasaporte N.º <strong id="dynMinorDniEs" class="text-brand-800">[DNI/Pasaporte del Menor]</strong>,
+            autorizo su participación en el Campamento de Verano 2027 "OVERCOMERS" de la Iglesia Presbiteriana de Taiwán en Argentina (IPTA), declaro haber leído y aceptado las NORMAS GENERALES y asumo plena responsabilidad por su comportamiento y seguridad.
+          </p>
+          <p class="text-slate-500">
+            本人 <strong id="dynTutorNameZh" class="text-brand-800">[父母或監護人姓名]</strong>（身分證/護照號碼：<strong id="dynTutorDniZh" class="text-brand-800">[證件號碼]</strong>），身為未成年參加者
+            <strong id="dynMinorNameZh" class="text-brand-800">[參加者姓名]</strong>（身分證/護照號碼：<strong id="dynMinorDniZh" class="text-brand-800">[參加者證件號碼]</strong>）之父母或監護人，茲同意其參加阿根廷基督長老教會(IPTA)2027年夏令營「得勝者」，並聲明已閱讀及同意上述一般規則，願對其舉止及安全負全責。
+          </p>
+        </div>
+
+        <div>
+          <p class="text-sm font-semibold text-slate-700 mb-1.5">Firma del padre, madre o tutor <span class="text-slate-400 font-normal">/ 父母或監護人簽名</span></p>
+          <div id="sigTutorBox" class="relative rounded-xl border-2 border-dashed border-amber-300 bg-white overflow-hidden transition-colors">
+            <div id="sigTutorPlaceholder" class="pointer-events-none absolute inset-0 flex flex-col items-center justify-center select-none px-4 text-center">
+              <svg class="w-8 h-8 mb-1 text-slate-300" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931z" />
+              </svg>
+              <span class="text-sm font-semibold text-slate-400">Firma del adulto, con el dedo</span>
+              <span class="text-xs text-slate-400">請父母或監護人用手指在此簽名</span>
+            </div>
+            <div class="pointer-events-none absolute left-6 right-6 bottom-7 border-b border-slate-200"></div>
+            <canvas id="canvasTutor" class="signature-canvas block w-full h-48"></canvas>
+          </div>
+          <div class="flex items-center justify-between gap-2 mt-2">
+            <p id="errSigTutor" class="hidden text-sm font-medium text-rose-600">Falta la firma del adulto. / 請父母或監護人簽名。</p>
+            <button
+              type="button"
+              id="clearSigTutor"
+              class="ml-auto inline-flex items-center gap-1.5 text-sm font-semibold text-slate-600 bg-slate-100 hover:bg-rose-50 hover:text-rose-600 px-3 py-2 rounded-lg transition-colors"
+            >
+              Borrar y firmar de nuevo · 重簽
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Aviso de fotos (para todos) -->
+      <p class="text-xs text-slate-500 leading-relaxed bg-slate-100 rounded-xl p-3.5">
+        📷 Durante el campamento la Coordinación tomará fotos y videos. Al enviar, autorizás a IPTA a usar la imagen del acampante con fines promocionales.
+        <span class="block text-slate-400 mt-0.5">營會期間大會將拍攝照片及影片。送出即表示授權IPTA在宣傳用途中使用參加者的肖像。</span>
+      </p>
 
       <!-- ========== ALERTA GLOBAL DE ERROR ========== -->
       <div id="globalErrorBox" class="hidden rounded-xl bg-rose-50 border border-rose-200 p-4 text-sm text-rose-800">
-        <div class="flex items-start gap-2.5">
-          <svg class="w-5 h-5 text-rose-600 shrink-0 mt-0.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-          </svg>
-          <div id="globalErrorMessage" class="leading-snug font-medium"></div>
-        </div>
+        <div id="globalErrorMessage" class="leading-snug font-medium"></div>
       </div>
 
-      <!-- ========== BOTÓN DE ENVÍO (PASO 4) ========== -->
+      <!-- ========== BOTÓN DE ENVÍO ========== -->
       <div class="pt-1">
         <button
           type="submit"
           id="submitBtn"
-          class="w-full py-4 px-6 rounded-2xl bg-brand-700 hover:bg-brand-800 active:scale-[0.99] text-white font-bold text-base shadow-lg shadow-brand-900/15 transition-all flex items-center justify-center gap-2.5 disabled:opacity-60 disabled:cursor-not-allowed"
+          class="w-full py-4 px-6 rounded-2xl bg-brand-700 hover:bg-brand-800 active:scale-[0.99] text-white font-extrabold text-lg shadow-lg shadow-brand-900/15 transition-all flex items-center justify-center gap-2.5 disabled:opacity-60 disabled:cursor-not-allowed"
         >
-          <svg id="submitIcon" class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+          <svg id="submitIcon" class="w-6 h-6 shrink-0" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
           </svg>
-          <svg id="submitSpinner" class="hidden w-5 h-5 animate-spin shrink-0" fill="none" viewBox="0 0 24 24">
+          <svg id="submitSpinner" class="hidden w-6 h-6 animate-spin shrink-0" fill="none" viewBox="0 0 24 24">
             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
             <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
           </svg>
-          <span id="submitBtnText">Confirmar y Enviar Firma / 確認並送出簽名</span>
+          <span id="submitBtnText">Enviar firma · 送出簽名</span>
         </button>
-        <p class="text-center text-[11px] text-slate-400 mt-2.5">
-          Al enviar, se generará el PDF oficial firmado y se adjuntará automáticamente a tu inscripción.
-        </p>
       </div>
     </form>
 
@@ -565,10 +452,10 @@
 
       <div class="bg-emerald-50/80 border border-emerald-200/80 rounded-xl p-4 text-sm text-emerald-950 leading-relaxed space-y-1.5 text-left">
         <p class="font-medium">
-          Tu autorización firmada ya le llegó a la Coordinación. <strong>Ahora completá el formulario de inscripción</strong> (paso 2 de 2). En la sección "Adjuntar" no hace falta subir nada.
+          Tu autorización firmada ya le llegó a la Coordinación. <strong>Ahora completá el formulario de inscripción</strong> (parte 2 de 2). En la sección "Adjuntar" no hace falta subir nada.
         </p>
         <p class="text-xs sm:text-sm text-emerald-800">
-          您簽署的同意書已傳送至大會。<strong>現在請填寫報名表</strong>（第 2 步，共 2 步）。「附上」欄位無須上傳任何檔案。
+          您簽署的同意書已傳送至大會。<strong>現在請填寫報名表</strong>（第二部分）。「附上」欄位無須上傳任何檔案。
         </p>
       </div>
 
@@ -1498,19 +1385,6 @@
       });
 
       // Acordeón de 13 Normas Generales
-      const toggleRulesBtn = document.getElementById('toggleRulesBtn');
-      const rulesPanel = document.getElementById('rulesAccordionPanel');
-      const toggleRulesLabel = document.getElementById('toggleRulesLabel');
-      const toggleRulesIcon = document.getElementById('toggleRulesIcon');
-
-      toggleRulesBtn.addEventListener('click', () => {
-        const isExpanded = toggleRulesBtn.getAttribute('aria-expanded') === 'true';
-        toggleRulesBtn.setAttribute('aria-expanded', String(!isExpanded));
-        rulesPanel.classList.toggle('hidden', isExpanded);
-        toggleRulesIcon.classList.toggle('rotate-180', !isExpanded);
-        toggleRulesLabel.textContent = isExpanded ? 'Ver normas / 展開規則' : 'Ocultar / 收合';
-      });
-
       // Checkbox de aceptación
       const acceptRulesCheckbox = document.getElementById('acceptRulesCheckbox');
       const acceptRulesContainer = document.getElementById('acceptRulesContainer');
@@ -1635,7 +1509,7 @@
         submitSpinner.classList.toggle('hidden', !loading);
         submitBtnText.textContent = loading
           ? 'Generando PDF y enviando... / 正在產生 PDF 並傳送中...'
-          : 'Confirmar y Enviar Firma / 確認並送出簽名';
+          : 'Enviar firma · 送出簽名';
       }
 
       function validateForm() {
