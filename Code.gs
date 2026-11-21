@@ -17,11 +17,13 @@
  *    NO los toques: creá un archivo nuevo con "+" > "Secuencia de comandos",
  *    llamalo "Overcomers" y pegá este código ahí. Todos los nombres internos
  *    llevan el prefijo "ovc"/"Overcomers" para no chocar con otros archivos.
+ *    Si otro archivo ya tiene una función `doPost`, renombrala a `doPostRecibos`:
+ *    el doPost de este archivo le reenvía todos los pedidos que no sean firmas.
  *    Guardá con Ctrl+S (o el ícono de disquete).
  *
  * 4. Verificá las constantes en `OVERCOMERS_CONFIG` más abajo:
  *    - `MAIN_SHEET_NAME`: debe coincidir con el nombre de la pestaña donde
- *      caen las respuestas del Google Form (por defecto: 'Respuestas de formulario 1').
+ *      caen las respuestas del Google Form (en esta planilla: 'Respuestas de formulario').
  *    - `TARGET_COL_INDEX`: 52 corresponde a la columna AZ ("Adjuntar / 附上").
  *    - `DNI_COL_INDEX`: dejalo en `null` para detectar automáticamente la columna
  *      de DNI/Pasaporte del inscripto por el encabezado de la fila 1, o poné el
@@ -59,7 +61,7 @@ const OVERCOMERS_CONFIG = {
   FOLDER_NAME: 'Autorizaciones OVERCOMERS 2027',
 
   // Pestaña principal con las respuestas del Google Form
-  MAIN_SHEET_NAME: 'Respuestas de formulario 1',
+  MAIN_SHEET_NAME: 'Respuestas de formulario',
 
   // Pestaña auxiliar creada automáticamente para quienes firman antes del Google Form
   PENDING_SHEET_NAME: 'Firmas_Pendientes',
@@ -69,18 +71,47 @@ const OVERCOMERS_CONFIG = {
 
   // Dejar en null para detectar automáticamente la columna de DNI/Pasaporte del solicitante,
   // o indicar un número de columna fijo (1 = A, 2 = B, etc.) si se desea forzar una columna específica.
-  DNI_COL_INDEX: null
+  DNI_COL_INDEX: 5 // Columna E = DNI del inscripto (igual que en EmitirRecibo.gs)
 };
 
 /**
- * Endpoint POST invocado por `index.html` al confirmar la firma digital.
+ * ÚNICO doPost del proyecto. Reparte cada pedido al sistema que corresponde:
+ *   - Firmas de OVERCOMERS (index.html manda origen: 'overcomers') -> ovcProcesarFirma
+ *   - Cualquier otro pedido -> doPostRecibos (el doPost original de EmitirRecibo.gs)
+ *
+ * IMPORTANTE: en EmitirRecibo.gs la función original tiene que llamarse
+ * `doPostRecibos` (no `doPost`), porque en un proyecto solo puede haber un doPost.
+ */
+function doPost(e) {
+  let datos = null;
+  try {
+    datos = JSON.parse(e.postData.contents);
+  } catch (_) {}
+
+  const esFirmaOvercomers =
+    datos && (datos.origen === 'overcomers' || (datos.pdfBase64 && datos.dniSolicitante));
+
+  if (esFirmaOvercomers) {
+    return ovcProcesarFirma(e);
+  }
+
+  if (typeof doPostRecibos === 'function') {
+    return doPostRecibos(e);
+  }
+
+  return ovcBuildJsonResponse({ ok: false, error: 'Solicitud no reconocida.' });
+}
+
+/**
+ * Procesa la firma digital enviada por `index.html`.
  * Recibe JSON con:
+ *   - origen: 'overcomers'
  *   - nombreSolicitante
  *   - dniSolicitante
  *   - pdfBase64
  *   - (opcionales) esMayor, nombreTutor, dniTutor, fileName
  */
-function doPost(e) {
+function ovcProcesarFirma(e) {
   const lock = LockService.getScriptLock();
   try {
     // Evita conflictos si varios acampantes envían su firma al mismo tiempo
@@ -233,7 +264,7 @@ function onFormSubmitOvercomers(e) {
 /**
  * Función utilitaria opcional (ejecutable manualmente desde el editor de Apps Script):
  * Recorre todas las filas con estado "Pendiente" en `Firmas_Pendientes` e intenta
- * vincularlas con `Respuestas de formulario 1` si el participante ya se inscribió.
+ * vincularlas con `Respuestas de formulario` si el participante ya se inscribió.
  */
 function sincronizarPendientesManualmente() {
   const ss = SpreadsheetApp.getActiveSpreadsheet();
