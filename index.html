@@ -452,10 +452,10 @@
 
       <div class="bg-emerald-50/80 border border-emerald-200/80 rounded-xl p-4 text-sm text-emerald-950 leading-relaxed space-y-1.5 text-left">
         <p class="font-medium">
-          Tu autorización firmada ya le llegó a la Coordinación. <strong>Ahora completá el formulario de inscripción</strong> (parte 2 de 2). En la sección "Adjuntar" no hace falta subir nada.
+          Tu autorización firmada ya le llegó a la Coordinación. <strong>Ahora completá el formulario de inscripción</strong> (parte 2 de 2). Usá el <strong>mismo DNI</strong> que pusiste acá.
         </p>
         <p class="text-xs sm:text-sm text-emerald-800">
-          您簽署的同意書已傳送至大會。<strong>現在請填寫報名表</strong>（第二部分）。「附上」欄位無須上傳任何檔案。
+          您簽署的同意書已傳送至大會。<strong>現在請填寫報名表</strong>（第二部分），請使用與此處<strong>相同的身分證號碼</strong>。
         </p>
       </div>
 
@@ -547,13 +547,13 @@
     // =========================================================================
     const GOOGLE_FORM_URL = 'https://docs.google.com/forms/d/e/1FAIpQLSeGWv0rR3pyMZ4CcCbK_t-kLLzDvh3JlNqrk1HTgmxjrlNZnw/viewform';
     const GOOGLE_FORM_ENTRIES = {
+      yaFirme: '',      // Sección 1: "¿Ya firmaste...?" (obligatoria)
       apellido: '',     // "Apellido / 姓"
       nombre: '',       // "Nombre / 名"
-      dni: '',          // "N° de DNI / 身分證號碼"
-      mayorDeEdad: ''   // "Al momento de iniciar el campamento ... ¿serás mayor de edad?"
+      dni: ''           // "N° de DNI / 身分證號碼"
     };
-    // Texto exacto de las opciones de la pregunta de mayoría de edad en el Form
-    const GOOGLE_FORM_OPCION_MAYOR = { si: 'Si / 是', no: 'No / 否' };
+    // Texto exacto de la opción de la pregunta "¿Ya firmaste...?" en el Form
+    const GOOGLE_FORM_OPCION_YA_FIRME = 'Sí, ya firmé / 是，已簽名';
 
     function buildGoogleFormUrl(data) {
       const params = new URLSearchParams();
@@ -561,10 +561,10 @@
         const id = GOOGLE_FORM_ENTRIES[key];
         if (id && value) params.append('entry.' + id, value);
       };
+      add('yaFirme', GOOGLE_FORM_OPCION_YA_FIRME);
       add('apellido', data.apellidoSolicitante);
       add('nombre', data.nombrePilaSolicitante);
       add('dni', data.dniSolicitante);
-      add('mayorDeEdad', data.esMayor ? GOOGLE_FORM_OPCION_MAYOR.si : GOOGLE_FORM_OPCION_MAYOR.no);
       const query = params.toString();
       return query ? GOOGLE_FORM_URL + '?usp=pp_url&' + query : GOOGLE_FORM_URL;
     }
@@ -1685,7 +1685,7 @@
 
           // Botón "Continuar con la inscripción" con los datos ya cargados
           document.getElementById('continueToFormBtn').href = buildGoogleFormUrl(data);
-          const formPrefilled = Boolean(GOOGLE_FORM_ENTRIES.apellido || GOOGLE_FORM_ENTRIES.dni);
+          const formPrefilled = Boolean(GOOGLE_FORM_ENTRIES.dni);
           document.getElementById('continueToFormHint').classList.toggle('hidden', !formPrefilled);
 
           const sumTutorRow = document.getElementById('sumTutorRow');

@@ -66,12 +66,19 @@ const OVERCOMERS_CONFIG = {
   // Pestaña auxiliar creada automáticamente para quienes firman antes del Google Form
   PENDING_SHEET_NAME: 'Firmas_Pendientes',
 
-  // Columna AZ = columna 52 ("Adjuntar / 附上")
+  // Columna AZ = columna 52 ("Adjuntar / 附上"). Aunque se borre esa pregunta del Form,
+  // la columna queda en la planilla y acá se sigue pegando el link del PDF firmado.
   TARGET_COL_INDEX: 52,
 
   // Dejar en null para detectar automáticamente la columna de DNI/Pasaporte del solicitante,
   // o indicar un número de columna fijo (1 = A, 2 = B, etc.) si se desea forzar una columna específica.
-  DNI_COL_INDEX: 5 // Columna E = DNI del inscripto (igual que en EmitirRecibo.gs)
+  DNI_COL_INDEX: 5, // Columna E = DNI del inscripto (igual que en EmitirRecibo.gs)
+
+  // Columna AY = columna 51 ("¿serás mayor de edad?"). Si la pregunta se saca del Form,
+  // se completa sola con lo que la persona eligió al firmar (solo si la celda está vacía).
+  MAYOR_COL_INDEX: 51,
+  MAYOR_SI: 'Si / 是',
+  MAYOR_NO: 'No / 否'
 };
 
 /**
@@ -126,6 +133,7 @@ function ovcProcesarFirma(e) {
     const dniRaw = String(data.dniSolicitante || '').trim();
     const dniLimpio = ovcNormalizeDni(dniRaw);
     const pdfBase64Raw = String(data.pdfBase64 || '').trim();
+    const mayorTexto = ovcMayorTexto(data.esMayor);
 
     if (!nombreSolicitante || !dniLimpio || !pdfBase64Raw) {
       return ovcBuildJsonResponse({
@@ -164,6 +172,7 @@ function ovcProcesarFirma(e) {
     if (matchedRow > 0) {
       // Escribir el enlace directo de Drive en la columna AZ (columna 52)
       mainSheet.getRange(matchedRow, OVERCOMERS_CONFIG.TARGET_COL_INDEX).setValue(driveUrl);
+      ovcFillMayorIfEmpty(mainSheet, matchedRow, mayorTexto);
 
       // Si existía algún registro previo en Firmas_Pendientes para este DNI, marcarlo como Vinculado
       ovcMarkPendingAsLinkedIfExists(ss, dniLimpio);
@@ -183,7 +192,8 @@ function ovcProcesarFirma(e) {
         nombreSolicitante,
         dniLimpio,
         driveUrl,
-        'Pendiente'
+        'Pendiente',
+        mayorTexto
       ]);
 
       return ovcBuildJsonResponse({
@@ -236,8 +246,8 @@ function onFormSubmitOvercomers(e) {
 
     // Buscar en Firmas_Pendientes (de abajo hacia arriba para tomar la firma más reciente)
     const pendingLastRow = pendingSheet.getLastRow();
-    const pendingValues = pendingSheet.getRange(2, 1, pendingLastRow - 1, 5).getValues();
-    // Columnas: [0] Fecha, [1] Nombre, [2] DNI, [3] URL_Drive, [4] Estado
+    const pendingValues = pendingSheet.getRange(2, 1, pendingLastRow - 1, 6).getValues();
+    // Columnas: [0] Fecha, [1] Nombre, [2] DNI, [3] URL_Drive, [4] Estado, [5] Mayor de edad
 
     for (let i = pendingValues.length - 1; i >= 0; i--) {
       const pendingDni = ovcNormalizeDni(pendingValues[i][2]);
@@ -247,6 +257,7 @@ function onFormSubmitOvercomers(e) {
       if (pendingDni === submittedDni && driveUrl && estado !== 'Vinculado') {
         // Pegar el enlace de Google Drive en la columna AZ (52) de la nueva fila
         targetSheet.getRange(newRow, OVERCOMERS_CONFIG.TARGET_COL_INDEX).setValue(driveUrl);
+        ovcFillMayorIfEmpty(targetSheet, newRow, pendingValues[i][5]);
 
         // Marcar el registro en Firmas_Pendientes como "Vinculado"
         const pendingRowIndex = i + 2;
@@ -278,7 +289,7 @@ function sincronizarPendientesManualmente() {
   }
 
   const pendingLastRow = pendingSheet.getLastRow();
-  const pendingValues = pendingSheet.getRange(2, 1, pendingLastRow - 1, 5).getValues();
+  const pendingValues = pendingSheet.getRange(2, 1, pendingLastRow - 1, 6).getValues();
   let vinculados = 0;
 
   for (let i = 0; i < pendingValues.length; i++) {
@@ -291,6 +302,7 @@ function sincronizarPendientesManualmente() {
     const matchedRow = ovcFindRowByDni(mainSheet, dniColIndex, pendingDni);
     if (matchedRow > 0) {
       mainSheet.getRange(matchedRow, OVERCOMERS_CONFIG.TARGET_COL_INDEX).setValue(driveUrl);
+      ovcFillMayorIfEmpty(mainSheet, matchedRow, pendingValues[i][5]);
       pendingSheet.getRange(i + 2, 5).setValue('Vinculado');
       vinculados++;
     }
@@ -302,6 +314,23 @@ function sincronizarPendientesManualmente() {
 /* ============================================================================
  * FUNCIONES AUXILIARES INTERNAS
  * ============================================================================ */
+
+/** true -> "Si / 是", false -> "No / 否", cualquier otra cosa -> "" (igual que las opciones del Form) */
+function ovcMayorTexto(esMayor) {
+  if (esMayor === true) return OVERCOMERS_CONFIG.MAYOR_SI;
+  if (esMayor === false) return OVERCOMERS_CONFIG.MAYOR_NO;
+  return '';
+}
+
+/** Completa la columna "¿serás mayor de edad?" (AY) solo si está vacía. */
+function ovcFillMayorIfEmpty(sheet, row, mayorTexto) {
+  const texto = String(mayorTexto || '').trim();
+  if (!texto || !OVERCOMERS_CONFIG.MAYOR_COL_INDEX) return;
+  const cell = sheet.getRange(row, OVERCOMERS_CONFIG.MAYOR_COL_INDEX);
+  if (String(cell.getValue() || '').trim() === '') {
+    cell.setValue(texto);
+  }
+}
 
 function ovcNormalizeDni(value) {
   return String(value || '')
@@ -343,13 +372,16 @@ function ovcGetMainResponsesSheet(ss) {
 }
 
 function ovcGetOrCreatePendingSheet(ss) {
+  const headers = ['Fecha', 'Nombre', 'DNI', 'URL_Drive', 'Estado', 'Mayor de edad'];
   let sheet = ss.getSheetByName(OVERCOMERS_CONFIG.PENDING_SHEET_NAME);
   if (!sheet) {
     sheet = ss.insertSheet(OVERCOMERS_CONFIG.PENDING_SHEET_NAME);
-    const headers = ['Fecha', 'Nombre', 'DNI', 'URL_Drive', 'Estado'];
     sheet.getRange(1, 1, 1, headers.length).setValues([headers]);
     sheet.getRange(1, 1, 1, headers.length).setFontWeight('bold');
     sheet.setFrozenRows(1);
+  } else if (String(sheet.getRange(1, 6).getValue() || '').trim() === '') {
+    // Pestaña creada con la versión anterior (5 columnas): agregar el título de la 6.ª
+    sheet.getRange(1, 6).setValue(headers[5]).setFontWeight('bold');
   }
   return sheet;
 }
