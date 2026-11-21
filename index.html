@@ -1,578 +1,1792 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <!-- Desactiva el zoom de doble toque y pellizco en celulares -->
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Organizador de Fulbito - 15 al 25 de Octubre</title>
-  
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>OVERCOMERS 2027 — Aceptación de Normas y Autorización | 規則同意書與授權書</title>
+
+  <!-- Google Fonts: Inter + Noto Sans TC (fallback limpio al sistema si no hay conexión rápida) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet" />
+
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
-  <!-- Firebase SDKs Compat -->
-  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Inter"', '"Noto Sans TC"', '"PingFang TC"', '"Microsoft JhengHei"', 'system-ui', 'sans-serif'],
+          },
+          colors: {
+            brand: {
+              50: '#f0f5fa',
+              100: '#dce7f3',
+              200: '#bfd4ea',
+              500: '#2d5a8c',
+              600: '#1f4470',
+              700: '#173457',
+              800: '#112742',
+              900: '#0b1b2e',
+            },
+          },
+        },
+      },
+    };
+  </script>
 
-  <!-- Reglas CSS para navegación táctil fluida -->
+  <!-- jsPDF CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.2/dist/jspdf.umd.min.js"></script>
+
   <style>
     * {
       touch-action: manipulation;
       -webkit-tap-highlight-color: transparent;
     }
-    /* Evita que los iPhone hagan zoom automático al tocar el input */
-    input[type="text"] {
+
+    html, body {
+      overscroll-behavior-y: contain;
+    }
+
+    /* Evita zoom automático en iOS Safari al enfocar inputs */
+    input[type="text"],
+    input[type="email"],
+    input[type="tel"],
+    textarea,
+    select {
       font-size: 16px !important;
+    }
+
+    /* Canvas de firma: bloquea scroll y zoom táctil para trazo fluido */
+    .signature-canvas {
+      touch-action: none !important;
+      user-select: none;
+      -webkit-user-select: none;
+      cursor: crosshair;
+    }
+
+    /* Scrollbar sutil para lista de normas */
+    .rules-scroll::-webkit-scrollbar {
+      width: 6px;
+    }
+    .rules-scroll::-webkit-scrollbar-track {
+      background: #f1f5f9;
+      border-radius: 9999px;
+    }
+    .rules-scroll::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 9999px;
+    }
+
+    /* Animación suave al desplegar secciones */
+    @keyframes fadeSlideIn {
+      from {
+        opacity: 0;
+        transform: translateY(8px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    .animate-fade-in {
+      animation: fadeSlideIn 0.25s ease-out forwards;
     }
   </style>
 </head>
-<body class="bg-slate-950 text-slate-100 min-h-screen font-sans antialiased pb-20 selection:bg-emerald-500 selection:text-slate-950">
+<body class="bg-slate-50 text-slate-800 min-h-screen font-sans antialiased selection:bg-brand-600 selection:text-white">
 
-  <!-- Header -->
-  <header class="bg-slate-900/90 border-b border-slate-800 sticky top-0 z-40 backdrop-blur-md px-4 py-3 shadow-md">
-    <div class="max-w-4xl mx-auto flex items-center justify-between">
-      <div class="flex items-center gap-2.5">
-        <span class="text-2xl">⚽</span>
-        <div>
-          <h1 class="font-bold text-base md:text-lg text-emerald-400 leading-tight">Fulbito Primos</h1>
-          <p class="text-[11px] text-slate-400">Jueves 15 al Domingo 25 de Octubre</p>
+  <!-- ==================== HEADER INSTITUCIONAL ==================== -->
+  <header class="bg-brand-900 text-white shadow-md sticky top-0 z-30 border-b border-white/10">
+    <div class="max-w-2xl mx-auto px-4 py-3.5 flex items-center justify-between gap-3">
+      <div class="flex items-center gap-3 min-w-0">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-400 to-amber-600 text-brand-900 font-extrabold text-sm flex items-center justify-center shadow-inner shrink-0 tracking-tight">
+          2027
+        </div>
+        <div class="min-w-0">
+          <p class="text-[11px] uppercase tracking-wider text-amber-300/95 font-semibold truncate">
+            IPTA · Campamento de Verano 2027
+          </p>
+          <h1 class="text-base sm:text-lg font-bold tracking-tight text-white leading-tight truncate">
+            OVERCOMERS <span class="font-medium text-slate-300 text-sm">「得勝者」</span>
+          </h1>
         </div>
       </div>
-      <div class="flex items-center gap-2">
-        <span class="inline-block w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-        <span class="text-xs text-emerald-400 font-medium">En vivo</span>
+      <div class="shrink-0 text-right hidden sm:block">
+        <span class="inline-flex items-center gap-1.5 text-xs font-medium bg-white/10 text-slate-100 px-2.5 py-1 rounded-full border border-white/15">
+          <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+          Firma Digital · 線上簽署
+        </span>
       </div>
     </div>
   </header>
 
-  <main class="max-w-4xl mx-auto px-3 sm:px-4 mt-4 space-y-4">
-    
-    <!-- Pestañas de navegación -->
-    <div class="flex bg-slate-900 p-1.5 rounded-xl border border-slate-800 max-w-md mx-auto shadow-inner">
-      <button id="tabMyAvailability" onclick="switchTab('my')" class="flex-1 py-2 text-xs sm:text-sm font-bold rounded-lg bg-emerald-600 text-white transition-all shadow-md">
-        Cargar mis horarios
-      </button>
-      <button id="tabGroupHeatmap" onclick="switchTab('group')" class="flex-1 py-2 text-xs sm:text-sm font-semibold rounded-lg text-slate-400 hover:text-white transition-all">
-        Ver grupo (Heatmap)
-      </button>
-    </div>
+  <!-- ==================== CONTENIDO PRINCIPAL ==================== -->
+  <main class="max-w-2xl mx-auto px-4 py-6 pb-20">
 
-    <!-- ==================== VISTA 1: CARGA PERSONAL ==================== -->
-    <section id="viewPersonal" class="space-y-4">
-      
-      <!-- Identificación de usuario -->
-      <div class="bg-slate-900 p-4 rounded-2xl border border-slate-800 shadow-md">
-        <label for="userName" class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">
-          ¿Quién sos? (Ingresá tu nombre)
-        </label>
-        <div class="flex gap-2">
-          <input type="text" id="userName" placeholder="Ej: Santi, Facu, Nico..." 
-                 class="flex-1 bg-slate-950 border border-slate-700/80 rounded-xl px-3.5 py-2.5 text-sm focus:outline-none focus:border-emerald-500 text-white placeholder-slate-500">
-          <button onclick="loadUserAvailability()" class="bg-slate-800 hover:bg-slate-700 border border-slate-700 px-4 py-2.5 text-xs font-semibold rounded-xl transition text-slate-200">
-            Cargar datos
+    <!-- Subtítulo introductorio -->
+    <section id="introBanner" class="mb-6 bg-white rounded-2xl border border-slate-200/90 p-4 sm:p-5 shadow-sm">
+      <div class="flex items-start gap-3">
+        <div class="w-9 h-9 rounded-lg bg-brand-50 text-brand-700 flex items-center justify-center shrink-0 mt-0.5">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+          </svg>
+        </div>
+        <div>
+          <h2 class="text-sm sm:text-base font-bold text-slate-900 leading-snug">
+            Aceptación de Normas y Autorización
+          </h2>
+          <p class="text-xs sm:text-sm text-slate-500 mt-0.5">
+            阿根廷基督長老教會 (IPTA) 2027年夏令營「得勝者」規則同意書與授權書
+          </p>
+          <p class="text-xs text-slate-500 mt-2 leading-relaxed">
+            Completá los pasos y firmá con tu dedo o mouse. El documento PDF se enviará automáticamente a la Coordinación.
+            <span class="block text-slate-400 mt-0.5">請依序完成以下步驟並親筆簽名，系統將自動產生 PDF 並傳送至大會。</span>
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== FORMULARIO PRINCIPAL ==================== -->
+    <form id="authorizationForm" class="space-y-5" novalidate>
+
+      <!-- ========== PASO 1: LECTURA DE NORMAS GENERALES ========== -->
+      <section id="step1Card" class="bg-white rounded-2xl border border-slate-200/90 shadow-sm overflow-hidden">
+        <div class="px-4 sm:px-5 pt-4 pb-3 border-b border-slate-100 flex items-center justify-between gap-2">
+          <div class="flex items-center gap-2.5">
+            <span class="w-7 h-7 rounded-full bg-brand-700 text-white text-xs font-bold flex items-center justify-center shrink-0">1</span>
+            <div>
+              <h3 class="text-sm sm:text-base font-bold text-slate-900">Normas Generales</h3>
+              <p class="text-xs text-slate-500">營會一般規則（共 13 條）</p>
+            </div>
+          </div>
+          <button
+            type="button"
+            id="toggleRulesBtn"
+            aria-expanded="true"
+            aria-controls="rulesAccordionPanel"
+            class="inline-flex items-center gap-1.5 text-xs font-semibold text-brand-700 bg-brand-50 hover:bg-brand-100 px-3 py-1.5 rounded-lg transition-colors"
+          >
+            <span id="toggleRulesLabel">Ocultar / 收合</span>
+            <svg id="toggleRulesIcon" class="w-4 h-4 transition-transform duration-200 rotate-180" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+            </svg>
           </button>
+        </div>
+
+        <!-- Acordeón desplegable con las 13 normas -->
+        <div id="rulesAccordionPanel" class="border-b border-slate-100">
+          <div class="rules-scroll max-h-[420px] overflow-y-auto px-4 sm:px-5 py-3 divide-y divide-slate-100 bg-slate-50/50">
+            <ol id="rulesList" class="space-y-0 divide-y divide-slate-200/70"></ol>
+          </div>
+        </div>
+
+        <!-- Checkbox de aceptación obligatoria -->
+        <div class="p-4 sm:p-5 bg-white">
+          <label
+            for="acceptRulesCheckbox"
+            id="acceptRulesContainer"
+            class="flex items-start gap-3 p-3.5 rounded-xl border-2 border-slate-200 bg-slate-50/70 hover:border-brand-500/60 cursor-pointer transition-all select-none"
+          >
+            <input
+              type="checkbox"
+              id="acceptRulesCheckbox"
+              class="mt-0.5 w-5 h-5 rounded border-slate-300 text-brand-700 focus:ring-brand-500 shrink-0 cursor-pointer accent-brand-700"
+            />
+            <span class="text-sm font-semibold text-slate-800 leading-snug">
+              Leí y acepto las 13 Normas Generales
+              <span class="block text-xs font-medium text-slate-600 mt-0.5">我已閱讀並同意以上規則</span>
+            </span>
+          </label>
+          <p id="errAcceptRules" class="hidden text-xs font-medium text-rose-600 mt-2">
+            Debés leer y aceptar las 13 Normas Generales para continuar. / 請先閱讀並勾選同意以上13條規則。
+          </p>
+        </div>
+      </section>
+
+      <!-- ========== PASO 2: SELECTOR DE EDAD AL 25/01/2027 ========== -->
+      <section id="step2Card" class="bg-white rounded-2xl border border-slate-200/90 shadow-sm p-4 sm:p-5">
+        <div class="flex items-start gap-2.5 mb-4">
+          <span class="w-7 h-7 rounded-full bg-brand-700 text-white text-xs font-bold flex items-center justify-center shrink-0 mt-0.5">2</span>
+          <div>
+            <h3 class="text-sm sm:text-base font-bold text-slate-900 leading-snug">
+              ¿Al momento de iniciar el campamento (25 de enero de 2027), serás mayor de 18 años?
+            </h3>
+            <p class="text-xs sm:text-sm text-slate-600 mt-1">
+              在營會開始時（2027年1月25日）你是否已滿 18 歲
+            </p>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3" role="radiogroup" aria-label="Edad al inicio del campamento">
+          <button
+            type="button"
+            id="btnMayor"
+            data-age="adult"
+            class="age-option-btn group relative flex items-center justify-between gap-3 p-4 rounded-xl border-2 border-slate-200 bg-white hover:border-brand-500 text-left transition-all"
+          >
+            <div>
+              <div class="text-sm sm:text-base font-bold text-slate-900">Sí, soy mayor de 18 años</div>
+              <div class="text-xs sm:text-sm font-medium text-slate-500 mt-0.5">是（已滿 18 歲）</div>
+            </div>
+            <div class="age-radio-dot w-6 h-6 rounded-full border-2 border-slate-300 flex items-center justify-center shrink-0 transition-colors">
+              <svg class="w-3.5 h-3.5 text-white hidden" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+              </svg>
+            </div>
+          </button>
+
+          <button
+            type="button"
+            id="btnMenor"
+            data-age="minor"
+            class="age-option-btn group relative flex items-center justify-between gap-3 p-4 rounded-xl border-2 border-slate-200 bg-white hover:border-brand-500 text-left transition-all"
+          >
+            <div>
+              <div class="text-sm sm:text-base font-bold text-slate-900">No, soy menor de 18 años</div>
+              <div class="text-xs sm:text-sm font-medium text-slate-500 mt-0.5">否（未滿 18 歲）</div>
+            </div>
+            <div class="age-radio-dot w-6 h-6 rounded-full border-2 border-slate-300 flex items-center justify-center shrink-0 transition-colors">
+              <svg class="w-3.5 h-3.5 text-white hidden" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+              </svg>
+            </div>
+          </button>
+        </div>
+
+        <p id="errAgeChoice" class="hidden text-xs font-medium text-rose-600 mt-2.5">
+          Seleccioná una opción para indicar si serás mayor o menor de 18 años. / 請選擇你在營會開始時是否已滿 18 歲。
+        </p>
+      </section>
+
+      <!-- ========== PASO 3: FORMULARIO Y PANELES DE FIRMA TÁCTIL ========== -->
+      <section id="step3Section" class="space-y-5">
+
+        <!-- BLOQUE A: SOLICITANTE (PARA TODOS) -->
+        <div id="blockACard" class="bg-white rounded-2xl border border-slate-200/90 shadow-sm p-4 sm:p-5 space-y-4">
+          <div class="flex items-center gap-2.5 pb-3 border-b border-slate-100">
+            <span class="w-7 h-7 rounded-full bg-brand-700 text-white text-xs font-bold flex items-center justify-center shrink-0">3</span>
+            <div>
+              <h3 class="text-sm sm:text-base font-bold text-slate-900">Datos y Firma del Solicitante</h3>
+              <p class="text-xs text-slate-500">參加者資料與簽名</p>
+            </div>
+          </div>
+
+          <!-- Texto legal Bloque A -->
+          <div class="bg-brand-50/70 border border-brand-200/70 rounded-xl p-3.5 text-xs sm:text-sm leading-relaxed text-slate-800 space-y-1.5">
+            <p class="font-medium">
+              Con la siguiente firma declaro mi aceptación y cumplimiento de las NORMAS GENERALES. Declaro bajo mi responsabilidad mi comportamiento durante el Campamento de Verano 2027 "OVERCOMERS".
+            </p>
+            <p class="text-slate-600">
+              以下簽名代表我願意遵守大會及場地規則,並在2027年夏令營「得勝者」期間對自己的舉止負責。
+            </p>
+          </div>
+
+          <!-- Campos Bloque A -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label for="nombreSolicitante" class="block text-xs sm:text-sm font-semibold text-slate-700 mb-1.5">
+                Nombre y Apellido <span class="text-slate-500 font-normal">/ 姓名</span> <span class="text-rose-500">*</span>
+              </label>
+              <input
+                type="text"
+                id="nombreSolicitante"
+                name="nombreSolicitante"
+                autocomplete="name"
+                placeholder="Ej: Juan Pérez"
+                class="w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-slate-900 placeholder:text-slate-400 focus:border-brand-600 focus:ring-2 focus:ring-brand-500/20 outline-none transition-all"
+              />
+              <p id="errNombreSolicitante" class="hidden text-xs font-medium text-rose-600 mt-1">
+                Ingresá tu nombre y apellido. / 請輸入姓名。
+              </p>
+            </div>
+
+            <div>
+              <label for="dniSolicitante" class="block text-xs sm:text-sm font-semibold text-slate-700 mb-1.5">
+                DNI o Pasaporte <span class="text-slate-500 font-normal">/ 身分證/護照號碼</span> <span class="text-rose-500">*</span>
+              </label>
+              <input
+                type="text"
+                id="dniSolicitante"
+                name="dniSolicitante"
+                inputmode="text"
+                autocomplete="off"
+                placeholder="Ej: 40123456"
+                class="w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-slate-900 uppercase placeholder:normal-case placeholder:text-slate-400 focus:border-brand-600 focus:ring-2 focus:ring-brand-500/20 outline-none transition-all"
+              />
+              <p class="text-[11px] text-slate-400 mt-1">
+                Sin puntos, espacios ni guiones · 請勿輸入點、空格或符號
+              </p>
+              <p id="errDniSolicitante" class="hidden text-xs font-medium text-rose-600 mt-1">
+                Ingresá un DNI o Pasaporte válido. / 請輸入有效的身分證或護照號碼。
+              </p>
+            </div>
+          </div>
+
+          <!-- Canvas de Firma Solicitante -->
+          <div class="pt-1">
+            <div class="flex items-center justify-between gap-2 mb-1.5">
+              <label class="text-xs sm:text-sm font-semibold text-slate-700">
+                Firma del Solicitante <span class="text-slate-500 font-normal">/ 參加者簽名</span> <span class="text-rose-500">*</span>
+              </label>
+              <button
+                type="button"
+                id="clearSigSolicitante"
+                class="inline-flex items-center gap-1 text-xs font-semibold text-slate-600 hover:text-rose-600 bg-slate-100 hover:bg-rose-50 px-2.5 py-1.5 rounded-lg transition-colors"
+              >
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                </svg>
+                Borrar firma / 清除簽名
+              </button>
+            </div>
+
+            <div id="sigSolicitanteBox" class="relative rounded-xl border-2 border-dashed border-slate-300 bg-white overflow-hidden transition-colors">
+              <div id="sigSolicitantePlaceholder" class="pointer-events-none absolute inset-0 flex flex-col items-center justify-center text-slate-300 select-none px-4 text-center">
+                <svg class="w-7 h-7 mb-1 opacity-70" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931z" />
+                </svg>
+                <span class="text-xs font-medium text-slate-400">Firmá aquí con el dedo o mouse · 請在此處簽名</span>
+              </div>
+              <!-- Línea guía visual (no se guarda en la imagen PNG transparente) -->
+              <div class="pointer-events-none absolute left-6 right-6 bottom-7 border-b border-slate-200"></div>
+              <canvas id="canvasSolicitante" class="signature-canvas block w-full h-44 sm:h-48"></canvas>
+            </div>
+            <p id="errSigSolicitante" class="hidden text-xs font-medium text-rose-600 mt-1.5">
+              Falta la firma del solicitante. / 請完成參加者簽名。
+            </p>
+          </div>
+        </div>
+
+        <!-- BLOQUE B: AUTORIZACIÓN DE PADRE, MADRE O TUTOR (SOLO MENORES DE 18) -->
+        <div id="blockBCard" class="hidden animate-fade-in bg-white rounded-2xl border-2 border-amber-300/80 shadow-sm p-4 sm:p-5 space-y-4">
+          <div class="flex items-start gap-2.5 pb-3 border-b border-amber-100">
+            <span class="w-7 h-7 rounded-full bg-amber-500 text-white text-xs font-bold flex items-center justify-center shrink-0 mt-0.5">B</span>
+            <div>
+              <h3 class="text-sm sm:text-base font-bold text-slate-900 leading-snug">
+                AUTORIZACIÓN DEL PADRE, MADRE O TUTOR (para menores de 18 años)
+              </h3>
+              <p class="text-xs sm:text-sm font-medium text-amber-800 mt-0.5">
+                父母或監護人同意書(未滿18歲者):
+              </p>
+            </div>
+          </div>
+
+          <!-- Campos Tutor -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label for="nombreTutor" class="block text-xs sm:text-sm font-semibold text-slate-700 mb-1.5">
+                Nombre y Apellido del Padre, Madre o Tutor <span class="text-slate-500 font-normal">/ 父母或監護人姓名</span> <span class="text-rose-500">*</span>
+              </label>
+              <input
+                type="text"
+                id="nombreTutor"
+                name="nombreTutor"
+                autocomplete="name"
+                placeholder="Ej: María Gómez"
+                class="w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-slate-900 placeholder:text-slate-400 focus:border-brand-600 focus:ring-2 focus:ring-brand-500/20 outline-none transition-all"
+              />
+              <p id="errNombreTutor" class="hidden text-xs font-medium text-rose-600 mt-1">
+                Ingresá el nombre y apellido del padre, madre o tutor. / 請輸入父母或監護人姓名。
+              </p>
+            </div>
+
+            <div>
+              <label for="dniTutor" class="block text-xs sm:text-sm font-semibold text-slate-700 mb-1.5">
+                DNI o Pasaporte del Padre, Madre o Tutor <span class="text-slate-500 font-normal">/ 父母或監護人身分證/護照號碼</span> <span class="text-rose-500">*</span>
+              </label>
+              <input
+                type="text"
+                id="dniTutor"
+                name="dniTutor"
+                inputmode="text"
+                autocomplete="off"
+                placeholder="Ej: 25123456"
+                class="w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-slate-900 uppercase placeholder:normal-case placeholder:text-slate-400 focus:border-brand-600 focus:ring-2 focus:ring-brand-500/20 outline-none transition-all"
+              />
+              <p class="text-[11px] text-slate-400 mt-1">
+                Sin puntos, espacios ni guiones · 請勿輸入點、空格或符號
+              </p>
+              <p id="errDniTutor" class="hidden text-xs font-medium text-rose-600 mt-1">
+                Ingresá un DNI o Pasaporte válido del adulto responsable. / 請輸入有效的父母或監護人身分證或護照號碼。
+              </p>
+            </div>
+          </div>
+
+          <!-- Cláusula dinámica con datos del menor y tutor -->
+          <div class="bg-amber-50/75 border border-amber-200/80 rounded-xl p-3.5 text-xs sm:text-sm leading-relaxed text-slate-800 space-y-2">
+            <p>
+              Yo, <strong id="dynTutorNameEs" class="text-brand-800 underline decoration-amber-400/80 underline-offset-2">[Nombre del Padre, Madre o Tutor]</strong>,
+              DNI/Pasaporte N.º <strong id="dynTutorDniEs" class="text-brand-800 underline decoration-amber-400/80 underline-offset-2">[DNI/Pasaporte]</strong>,
+              en carácter de padre, madre o tutor legal de
+              <strong id="dynMinorNameEs" class="text-brand-800 underline decoration-amber-400/80 underline-offset-2">[Nombre del Menor]</strong>,
+              DNI/Pasaporte N.º <strong id="dynMinorDniEs" class="text-brand-800 underline decoration-amber-400/80 underline-offset-2">[DNI/Pasaporte del Menor]</strong>,
+              autorizo su participación en el Campamento de Verano 2027 "OVERCOMERS" de la Iglesia Presbiteriana de Taiwán en Argentina (IPTA), declaro haber leído y aceptado las NORMAS GENERALES y asumo plena responsabilidad por su comportamiento y seguridad.
+            </p>
+            <p class="text-slate-600">
+              本人 <strong id="dynTutorNameZh" class="text-brand-800">[父母或監護人姓名]</strong>（身分證/護照號碼：<strong id="dynTutorDniZh" class="text-brand-800">[證件號碼]</strong>），身為未成年參加者
+              <strong id="dynMinorNameZh" class="text-brand-800">[參加者姓名]</strong>（身分證/護照號碼：<strong id="dynMinorDniZh" class="text-brand-800">[參加者證件號碼]</strong>）之父母或監護人，茲同意其參加阿根廷基督長老教會(IPTA)2027年夏令營「得勝者」，並聲明已閱讀及同意上述一般規則，願對其舉止及安全負全責。
+            </p>
+          </div>
+
+          <!-- Canvas de Firma Tutor -->
+          <div class="pt-1">
+            <div class="flex items-center justify-between gap-2 mb-1.5">
+              <label class="text-xs sm:text-sm font-semibold text-slate-700">
+                Firma del Padre, Madre o Tutor <span class="text-slate-500 font-normal">/ 父母或監護人簽名</span> <span class="text-rose-500">*</span>
+              </label>
+              <button
+                type="button"
+                id="clearSigTutor"
+                class="inline-flex items-center gap-1 text-xs font-semibold text-slate-600 hover:text-rose-600 bg-slate-100 hover:bg-rose-50 px-2.5 py-1.5 rounded-lg transition-colors"
+              >
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                </svg>
+                Borrar firma / 清除簽名
+              </button>
+            </div>
+
+            <div id="sigTutorBox" class="relative rounded-xl border-2 border-dashed border-amber-300 bg-white overflow-hidden transition-colors">
+              <div id="sigTutorPlaceholder" class="pointer-events-none absolute inset-0 flex flex-col items-center justify-center text-slate-300 select-none px-4 text-center">
+                <svg class="w-7 h-7 mb-1 opacity-70" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931z" />
+                </svg>
+                <span class="text-xs font-medium text-slate-400">Firma del adulto responsable · 請父母或監護人在此簽名</span>
+              </div>
+              <div class="pointer-events-none absolute left-6 right-6 bottom-7 border-b border-slate-200"></div>
+              <canvas id="canvasTutor" class="signature-canvas block w-full h-44 sm:h-48"></canvas>
+            </div>
+            <p id="errSigTutor" class="hidden text-xs font-medium text-rose-600 mt-1.5">
+              Falta la firma del padre, madre o tutor. / 請完成父母或監護人簽名。
+            </p>
+          </div>
+        </div>
+
+        <!-- BLOQUE C: CLÁUSULA DE IMAGEN (PARA TODOS) -->
+        <div class="bg-slate-900 text-slate-100 rounded-2xl p-4 sm:p-5 shadow-sm border border-slate-800">
+          <div class="flex items-start gap-3">
+            <div class="w-8 h-8 rounded-lg bg-amber-400/15 text-amber-300 flex items-center justify-center shrink-0 mt-0.5">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                <path stroke-linecap="round" stroke-linejoin="round" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+              </svg>
+            </div>
+            <div class="space-y-1.5 text-xs sm:text-sm leading-relaxed">
+              <p class="font-bold text-amber-300 tracking-wide uppercase text-xs">
+                IMPORTANTE / 注意事項
+              </p>
+              <p class="text-slate-100">
+                Durante el campamento se tomarán fotografías y videos de los participantes por parte de la Coordinación. Por la presente se autoriza a IPTA/la Coordinación a usar la imagen del acampante en fotografías y videos para fines promocionales.
+              </p>
+              <p class="text-slate-300">
+                營會期間大會將拍攝參加者的照片及影片。本人特此授權IPTA及大會在宣傳用途的照片及影片中使用參加者的肖像。
+              </p>
+            </div>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- ========== ALERTA GLOBAL DE ERROR ========== -->
+      <div id="globalErrorBox" class="hidden rounded-xl bg-rose-50 border border-rose-200 p-4 text-sm text-rose-800">
+        <div class="flex items-start gap-2.5">
+          <svg class="w-5 h-5 text-rose-600 shrink-0 mt-0.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          <div id="globalErrorMessage" class="leading-snug font-medium"></div>
         </div>
       </div>
 
-      <!-- Barra de herramientas: Atajos y Leyenda -->
-      <div class="bg-slate-900/60 p-3 rounded-xl border border-slate-800/80 flex flex-wrap items-center justify-between gap-3 text-xs">
-        <div class="flex items-center gap-3 text-slate-400 font-medium">
-          <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded bg-emerald-500"></span> Puedo</span>
-          <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded bg-amber-500"></span> En duda</span>
-          <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded bg-slate-950 border border-slate-700"></span> No</span>
-        </div>
-        <div class="flex items-center gap-2">
-          <button onclick="setAllPersonalSlots('yes')" class="px-2.5 py-1 bg-emerald-950/70 text-emerald-400 border border-emerald-800/60 rounded-lg hover:bg-emerald-900 text-[11px] font-medium transition">
-            ✓ Todo puedo
-          </button>
-          <button onclick="setAllPersonalSlots('no')" class="px-2.5 py-1 bg-slate-800 text-slate-400 border border-slate-700 rounded-lg hover:bg-slate-700 text-[11px] font-medium transition">
-            Limpiar
-          </button>
-        </div>
-      </div>
-
-      <!-- Indicador táctil -->
-      <p class="text-[11px] text-slate-400 text-center sm:hidden">
-        ← Deslizá hacia los costados para ver todos los días →
-      </p>
-
-      <!-- Tabla de horarios (Con columna fija sticky) -->
-      <div class="bg-slate-900 rounded-2xl border border-slate-800 overflow-x-auto shadow-xl">
-        <div id="personalTableContainer"></div>
-      </div>
-
-      <!-- Botón de guardar inferior -->
-      <div class="sticky bottom-4 pt-2">
-        <button onclick="saveAvailability()" id="btnSave" class="w-full bg-emerald-500 hover:bg-emerald-400 active:scale-[0.99] text-slate-950 font-black py-3.5 rounded-xl transition shadow-xl shadow-emerald-500/25 text-sm uppercase tracking-wider flex items-center justify-center gap-2">
-          <span>💾 Guardar mi disponibilidad</span>
+      <!-- ========== BOTÓN DE ENVÍO (PASO 4) ========== -->
+      <div class="pt-1">
+        <button
+          type="submit"
+          id="submitBtn"
+          class="w-full py-4 px-6 rounded-2xl bg-brand-700 hover:bg-brand-800 active:scale-[0.99] text-white font-bold text-base shadow-lg shadow-brand-900/15 transition-all flex items-center justify-center gap-2.5 disabled:opacity-60 disabled:cursor-not-allowed"
+        >
+          <svg id="submitIcon" class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          <svg id="submitSpinner" class="hidden w-5 h-5 animate-spin shrink-0" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
+          </svg>
+          <span id="submitBtnText">Confirmar y Enviar Firma / 確認並送出簽名</span>
         </button>
-        <p id="saveFeedback" class="text-xs text-center text-emerald-400 font-bold mt-1.5 hidden bg-emerald-950/80 py-1.5 rounded-lg border border-emerald-800/50">
-          ¡Tus horarios se guardaron y sincronizaron en vivo!
+        <p class="text-center text-[11px] text-slate-400 mt-2.5">
+          Al enviar, se generará el PDF oficial firmado y se adjuntará automáticamente a tu inscripción.
         </p>
       </div>
+    </form>
+
+    <!-- ==================== PANTALLA DE ÉXITO ==================== -->
+    <section id="successScreen" class="hidden animate-fade-in bg-white rounded-2xl border border-emerald-200 shadow-md p-6 sm:p-8 text-center space-y-5">
+      <div class="w-16 h-16 rounded-full bg-emerald-100 text-emerald-600 mx-auto flex items-center justify-center shadow-inner">
+        <svg class="w-9 h-9" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+        </svg>
+      </div>
+
+      <div class="space-y-1.5">
+        <h2 class="text-xl sm:text-2xl font-extrabold text-slate-900">
+          ¡Autorización enviada con éxito!
+        </h2>
+        <p class="text-base font-bold text-emerald-700">
+          簽名與同意書已成功送出！
+        </p>
+      </div>
+
+      <div class="bg-emerald-50/80 border border-emerald-200/80 rounded-xl p-4 text-sm text-emerald-950 leading-relaxed space-y-1.5 text-left">
+        <p class="font-medium">
+          Tu documento PDF firmado ya fue enviado automáticamente a la Coordinación del Campamento de Verano 2027 "OVERCOMERS". <strong>No necesitás subir ningún archivo manualmente.</strong>
+        </p>
+        <p class="text-xs sm:text-sm text-emerald-800">
+          您所簽署的 PDF 同意書已自動傳送至2027年「得勝者」夏令營大會，<strong>無須再手動上傳任何檔案</strong>。
+        </p>
+      </div>
+
+      <!-- Resumen de datos enviados -->
+      <div id="successSummary" class="bg-slate-50 rounded-xl border border-slate-200 p-4 text-left text-xs sm:text-sm space-y-2">
+        <div class="flex justify-between gap-2">
+          <span class="text-slate-500">Solicitante / 參加者:</span>
+          <span id="sumNombre" class="font-semibold text-slate-900 text-right"></span>
+        </div>
+        <div class="flex justify-between gap-2">
+          <span class="text-slate-500">DNI / Pasaporte:</span>
+          <span id="sumDni" class="font-semibold text-slate-900 font-mono text-right"></span>
+        </div>
+        <div class="flex justify-between gap-2">
+          <span class="text-slate-500">Categoría / 年齡資格:</span>
+          <span id="sumEdad" class="font-semibold text-slate-900 text-right"></span>
+        </div>
+        <div id="sumTutorRow" class="hidden flex justify-between gap-2 pt-1.5 border-t border-slate-200">
+          <span class="text-slate-500">Padre/Madre/Tutor / 監護人:</span>
+          <span id="sumTutor" class="font-semibold text-slate-900 text-right"></span>
+        </div>
+        <div class="flex justify-between gap-2 pt-1.5 border-t border-slate-200">
+          <span class="text-slate-500">Archivo / 檔案名稱:</span>
+          <span id="sumFileName" class="font-medium text-slate-700 font-mono text-xs break-all text-right"></span>
+        </div>
+      </div>
+
+      <!-- Aviso si aún no se configuró APPS_SCRIPT_URL (solo modo prueba) -->
+      <div id="demoModeNotice" class="hidden bg-amber-50 border border-amber-300 rounded-xl p-3.5 text-left text-xs text-amber-900">
+        <strong>Modo de prueba local:</strong> Todavía no se configuró la variable <code>APPS_SCRIPT_URL</code> en <code>index.html</code>. El PDF se generó correctamente en tu dispositivo; pegá la URL de tu Google Apps Script para activar el envío automático a Google Drive y Sheets.
+      </div>
+
+      <!-- Botón secundario opcional para descargar copia PDF -->
+      <div class="space-y-3 pt-1">
+        <button
+          type="button"
+          id="downloadCopyBtn"
+          class="w-full py-3.5 px-5 rounded-xl bg-white hover:bg-slate-50 text-brand-700 font-bold text-sm border-2 border-brand-600/30 hover:border-brand-600 transition-all flex items-center justify-center gap-2"
+        >
+          <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+          </svg>
+          <span>Descargar copia en PDF (opcional) · 下載 PDF 副本（選用）</span>
+        </button>
+
+        <button
+          type="button"
+          id="resetFormBtn"
+          class="w-full py-2.5 px-4 rounded-xl text-xs font-semibold text-slate-500 hover:text-slate-800 hover:bg-slate-100 transition-colors"
+        >
+          Completar otra autorización / 填寫另一份同意書
+        </button>
+      </div>
     </section>
 
-    <!-- ==================== VISTA 2: HEATMAP GRUPAL ==================== -->
-    <section id="viewGroup" class="space-y-4 hidden">
-      
-      <!-- Tarjeta del mejor horario -->
-      <div class="bg-gradient-to-r from-emerald-950 via-slate-900 to-slate-900 p-4 rounded-2xl border border-emerald-500/30 flex items-center justify-between shadow-lg">
-        <div>
-          <span class="text-[11px] font-bold text-emerald-400 uppercase tracking-wider">Mejor momento para el partido</span>
-          <div id="bestSlotText" class="text-base sm:text-lg font-black text-white mt-0.5">Calculando...</div>
-        </div>
-        <div class="text-right">
-          <div id="bestSlotCount" class="text-2xl font-black text-emerald-400 bg-emerald-900/60 px-3.5 py-1 rounded-xl border border-emerald-500/30 inline-block">
-            0
-          </div>
-          <div class="text-[10px] text-slate-400 mt-1">confirmados</div>
-        </div>
-      </div>
-
-      <div class="flex items-center justify-between text-xs text-slate-400 px-1">
-        <span>Tocá cualquier horario para ver los nombres:</span>
-        <span class="text-[11px] text-slate-500 sm:hidden">← Deslizá horizontalmente →</span>
-      </div>
-
-      <!-- Grilla Heatmap con columna fija -->
-      <div class="bg-slate-900 rounded-2xl border border-slate-800 overflow-x-auto shadow-xl">
-        <div id="heatmapTableContainer"></div>
-      </div>
-
-      <!-- Lista de primos participantes -->
-      <div class="bg-slate-900 p-4 rounded-2xl border border-slate-800 shadow-md">
-        <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2.5">
-          Primos que cargaron disponibilidad (<span id="totalVoters">0</span>)
-        </h3>
-        <div id="votersList" class="flex flex-wrap gap-2 text-xs"></div>
-      </div>
-    </section>
-
+    <footer class="mt-10 text-center text-[11px] text-slate-400 space-y-0.5">
+      <p>Iglesia Presbiteriana de Taiwán en Argentina (IPTA)</p>
+      <p>Campamento de Verano 2027 "OVERCOMERS" · 2027年夏令營「得勝者」</p>
+    </footer>
   </main>
 
-  <!-- Modal detalle de votantes por horario -->
-  <div id="slotModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
-    <div class="bg-slate-900 border border-slate-700/80 p-5 rounded-2xl w-full max-w-sm space-y-4 shadow-2xl animate-in fade-in zoom-in-95 duration-150">
-      <div class="flex items-start justify-between border-b border-slate-800 pb-3">
-        <div>
-          <h3 id="modalSlotTitle" class="font-extrabold text-white text-base leading-snug">Horario</h3>
-          <p id="modalSlotSubtitle" class="text-xs text-emerald-400 font-semibold"></p>
-        </div>
-        <button onclick="closeModal()" class="text-slate-400 hover:text-white text-2xl leading-none">&times;</button>
-      </div>
-
-      <div class="space-y-3 text-sm">
-        <div class="bg-slate-950/60 p-2.5 rounded-xl border border-emerald-900/40">
-          <div class="font-bold text-emerald-400 text-xs mb-1 flex items-center gap-1.5">
-            <span class="w-2 h-2 rounded-full bg-emerald-400"></span> Pueden (<span id="countYes">0</span>):
-          </div>
-          <div id="modalAvailableList" class="text-slate-300 text-xs leading-relaxed">Nadie aún</div>
-        </div>
-
-        <div class="bg-slate-950/60 p-2.5 rounded-xl border border-amber-900/40">
-          <div class="font-bold text-amber-400 text-xs mb-1 flex items-center gap-1.5">
-            <span class="w-2 h-2 rounded-full bg-amber-400"></span> En duda (<span id="countMaybe">0</span>):
-          </div>
-          <div id="modalMaybeList" class="text-slate-300 text-xs leading-relaxed">Nadie</div>
-        </div>
-
-        <div class="bg-slate-950/60 p-2.5 rounded-xl border border-slate-800">
-          <div class="font-bold text-slate-500 text-xs mb-1 flex items-center gap-1.5">
-            <span class="w-2 h-2 rounded-full bg-slate-600"></span> No pueden (<span id="countNo">0</span>):
-          </div>
-          <div id="modalUnavailableList" class="text-slate-500 text-xs leading-relaxed">Nadie</div>
-        </div>
-      </div>
-
-      <button onclick="closeModal()" class="w-full bg-slate-800 hover:bg-slate-700 text-white font-semibold py-2.5 rounded-xl text-xs transition">
-        Cerrar
-      </button>
-    </div>
-  </div>
-
-  <!-- Lógica JavaScript integrada -->
   <script>
-    const firebaseConfig = {
-      apiKey: "AIzaSyDLdIpZrptvK5WsIFjWYCGT9x-CiLeoB3M",
-      authDomain: "fulbito-a69a9.firebaseapp.com",
-      databaseURL: "https://fulbito-a69a9-default-rtdb.firebaseio.com",
-      projectId: "fulbito-a69a9",
-      storageBucket: "fulbito-a69a9.firebasestorage.app",
-      messagingSenderId: "614840789857",
-      appId: "1:614840789857:web:aa91fe035ed29678f37320",
-      measurementId: "G-NKWKM2ZB9P"
-    };
+    // =========================================================================
+    // CONFIGURACIÓN DE BACKEND (GOOGLE APPS SCRIPT)
+    // Pegá aquí la URL de tu Web App desplegada desde Code.gs
+    // =========================================================================
+    const APPS_SCRIPT_URL = 'PEGAR_AQUI_URL_DE_GOOGLE_APPS_SCRIPT';
 
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.database();
-    const responsesRef = db.ref("fulbito/respuestas");
-
-    // Fechas exactas del 15 al 25 de Octubre
-    const DAYS = [
-      { id: "2026-10-15", name: "Jue", num: "15", full: "Jueves 15 Oct" },
-      { id: "2026-10-16", name: "Vie", num: "16", full: "Viernes 16 Oct" },
-      { id: "2026-10-17", name: "Sáb", num: "17", full: "Sábado 17 Oct" },
-      { id: "2026-10-18", name: "Dom", num: "18", full: "Domingo 18 Oct" },
-      { id: "2026-10-19", name: "Lun", num: "19", full: "Lunes 19 Oct" },
-      { id: "2026-10-20", name: "Mar", num: "20", full: "Martes 20 Oct" },
-      { id: "2026-10-21", name: "Mié", num: "21", full: "Miércoles 21 Oct" },
-      { id: "2026-10-22", name: "Jue", num: "22", full: "Jueves 22 Oct" },
-      { id: "2026-10-23", name: "Vie", num: "23", full: "Viernes 23 Oct" },
-      { id: "2026-10-24", name: "Sáb", num: "24", full: "Sábado 24 Oct" },
-      { id: "2026-10-25", name: "Dom", num: "25", full: "Domingo 25 Oct" }
+    // =========================================================================
+    // 13 NORMAS GENERALES (TEXTO OFICIAL BILINGÜE EXACTO)
+    // =========================================================================
+    const NORMAS_GENERALES = [
+      {
+        num: 1,
+        es: 'Respete las normas establecidas por la Coordinación del Campamento de Verano 2027 "OVERCOMERS" de la Iglesia Presbiteriana de Taiwán en Argentina (IPTA).',
+        zh: '請遵守阿根廷基督長老教會(IPTA)2027年夏令營「得勝者」大會所制定的規則。'
+      },
+      {
+        num: 2,
+        es: 'Respete las indicaciones de los coordinadores, los profesores y los encargados del establecimiento.',
+        zh: '請遵守同工、老師及營地管理人員的指示。'
+      },
+      {
+        num: 3,
+        es: 'Cumpla con los horarios. En caso de fuerza mayor consultar y avisar a los coordinadores.',
+        zh: '請遵守大會的時間表。若有任何特殊情況,請向同工報備並詢問。'
+      },
+      {
+        num: 4,
+        es: 'Mantenga la limpieza y el orden del establecimiento.',
+        zh: '請保持營地的整潔及秩序。'
+      },
+      {
+        num: 5,
+        es: 'Se prohíbe el ingreso a los dormitorios ajenos. En caso de ser necesario pida ayuda al encargado/a de la habitación o al equipo de Coordinación.',
+        zh: '請勿進入他人寢室。如有需要請向寢室長或同工尋求協助。'
+      },
+      {
+        num: 6,
+        es: 'Se prohíbe fumar y consumir toda bebida alcohólica durante el campamento.',
+        zh: '請勿在營會期間抽煙及喝含有酒精的飲料。'
+      },
+      {
+        num: 7,
+        es: 'Todos los menores de 18 años deben entregar la autorización del padre, madre o tutor.',
+        zh: '所有18歲以下的參加者,必須提交父母或監護人的同意書。'
+      },
+      {
+        num: 8,
+        es: 'En caso de no poder participar del campamento, no se devuelve la seña o el pago de la inscripción efectuada.',
+        zh: '若不能參加營會,訂金或已繳納的報名費恕不退還。'
+      },
+      {
+        num: 9,
+        es: 'Los padres de los hijos menores de edad son los responsables de sus comportamientos y seguridad.',
+        zh: '未成年參加者的父母或監護人,須對其子女的舉止及安全負全責。'
+      },
+      {
+        num: 10,
+        es: 'La Coordinación no se hace cargo de los objetos personales, cada uno es responsable de sus propias pertenencias.',
+        zh: '大會不負個人隨身物品的保管責任,請自行妥善保管。'
+      },
+      {
+        num: 11,
+        es: 'Ante el primer incumplimiento de las normas, se hará una llamada de atención. En caso de que vuelva a suceder la misma u otras faltas, la Coordinación tiene derecho a pedir que abandone el campamento (en caso de ser menor de 18 años, uno de los padres o el tutor tendrá que buscarlo). En este caso no se devuelve el pago efectuado.',
+        zh: '當第一次違規時,大會將給予一次警告。若有再次違規,大會有權要求違規者退營(若未滿18歲,父母或監護人必須到營地親自接回)。退營者其報名費將不退回。'
+      },
+      {
+        num: 12,
+        es: 'Llevar DNI/Pasaporte.',
+        zh: '請帶身分證或護照。'
+      },
+      {
+        num: 13,
+        es: 'PROHIBIDO LLEVAR: Elementos cortantes; Pirotecnia; Alcohol; Sustancias ilícitas.',
+        zh: '禁止攜帶物品:尖銳物品;煙火爆竹;酒精飲料;違禁藥品'
+      }
     ];
 
-    const HOURS = ["16:00", "17:00", "18:00", "19:00", "20:00", "21:00", "22:00", "23:00"];
+    const TEXTOS_LEGALES = {
+      bloqueA_es: 'Con la siguiente firma declaro mi aceptación y cumplimiento de las NORMAS GENERALES. Declaro bajo mi responsabilidad mi comportamiento durante el Campamento de Verano 2027 "OVERCOMERS".',
+      bloqueA_zh: '以下簽名代表我願意遵守大會及場地規則,並在2027年夏令營「得勝者」期間對自己的舉止負責。',
+      bloqueC_es: 'IMPORTANTE: Durante el campamento se tomarán fotografías y videos de los participantes por parte de la Coordinación. Por la presente se autoriza a IPTA/la Coordinación a usar la imagen del acampante en fotografías y videos para fines promocionales.',
+      bloqueC_zh: '注意事項: 營會期間大會將拍攝參加者的照片及影片。本人特此授權IPTA及大會在宣傳用途的照片及影片中使用參加者的肖像。'
+    };
 
-    let mySlots = {};
-    let allResponses = {};
+    // =========================================================================
+    // ESTADO DE LA APLICACIÓN
+    // =========================================================================
+    const state = {
+      esMayor: null, // true | false | null
+      generatedPdfBlob: null,
+      generatedFileName: '',
+      isSubmitting: false
+    };
 
-    function initApp() {
-      const savedName = localStorage.getItem("fulbito_username");
-      if (savedName) {
-        document.getElementById("userName").value = savedName;
-      }
-      buildPersonalGrid();
-      listenToDatabase();
-    }
+    // =========================================================================
+    // CLASE SIGNATURE PAD (ALTA DEFINICIÓN, TÁCTIL Y TRANSPARENTE)
+    // =========================================================================
+    class SignaturePad {
+      constructor(canvasId, placeholderId, onChange) {
+        this.canvas = document.getElementById(canvasId);
+        this.placeholder = document.getElementById(placeholderId);
+        this.ctx = this.canvas.getContext('2d');
+        this.onChange = onChange || (() => {});
+        this.isDrawing = false;
+        this.hasInk = false;
+        this.lastPoint = null;
+        this.dpr = Math.max(window.devicePixelRatio || 1, 2);
 
-    function buildPersonalGrid() {
-      const container = document.getElementById("personalTableContainer");
-      if (!container) return;
-
-      let html = `
-        <table class="w-full border-collapse text-xs select-none">
-          <thead>
-            <tr class="bg-slate-900 border-b border-slate-800">
-              <th class="sticky left-0 z-30 bg-slate-900 p-2.5 text-center font-bold text-slate-400 min-w-[62px] border-r border-slate-800">
-                Hora
-              </th>`;
-
-      DAYS.forEach(day => {
-        const isWeekend = day.name === "Sáb" || day.name === "Dom";
-        html += `
-          <th class="p-2 text-center min-w-[68px] sm:min-w-[76px] border-r border-slate-800/80">
-            <div class="text-[10px] font-extrabold uppercase ${isWeekend ? 'text-amber-400' : 'text-emerald-400'}">${day.name}</div>
-            <div class="text-sm font-black text-white">${day.num}</div>
-            <div class="text-[9px] text-slate-500 font-medium">Oct</div>
-          </th>`;
-      });
-
-      html += `</tr></thead><tbody>`;
-
-      HOURS.forEach(hour => {
-        html += `<tr class="border-b border-slate-800/60">
-          <td class="sticky left-0 z-20 bg-slate-900 p-2 text-center font-bold text-slate-400 text-[11px] border-r border-slate-800 shadow-[2px_0_5px_rgba(0,0,0,0.3)]">
-            ${hour}
-          </td>`;
-
-        DAYS.forEach(day => {
-          const slotKey = `${day.id}_${hour}`;
-          html += `
-            <td class="p-1 border-r border-slate-800/60 text-center">
-              <button type="button" id="cell-${slotKey}" onclick="toggleCellState('${slotKey}')"
-                class="w-full h-10 rounded-lg font-bold text-xs flex items-center justify-center transition-all bg-slate-950 border border-slate-800 text-slate-600 hover:border-slate-700">
-                —
-              </button>
-            </td>`;
-        });
-
-        html += `</tr>`;
-      });
-
-      html += `</tbody></table>`;
-      container.innerHTML = html;
-      updatePersonalGridVisuals();
-    }
-
-    function toggleCellState(slotKey) {
-      const current = mySlots[slotKey] || "no";
-      let next = "yes";
-      if (current === "yes") next = "maybe";
-      else if (current === "maybe") next = "no";
-
-      mySlots[slotKey] = next;
-      const cell = document.getElementById(`cell-${slotKey}`);
-      if (cell) renderCellState(cell, next);
-    }
-
-    function renderCellState(cell, state) {
-      cell.className = "w-full h-10 rounded-lg font-bold text-xs flex items-center justify-center transition-all select-none ";
-      if (state === "yes") {
-        cell.className += "bg-emerald-600 border border-emerald-400 text-white shadow-sm shadow-emerald-500/20";
-        cell.innerText = "✓";
-      } else if (state === "maybe") {
-        cell.className += "bg-amber-500 border border-amber-300 text-slate-950 font-black";
-        cell.innerText = "?";
-      } else {
-        cell.className += "bg-slate-950 border border-slate-800 text-slate-600 hover:border-slate-700";
-        cell.innerText = "—";
-      }
-    }
-
-    function updatePersonalGridVisuals() {
-      DAYS.forEach(day => {
-        HOURS.forEach(hour => {
-          const slotKey = `${day.id}_${hour}`;
-          const cell = document.getElementById(`cell-${slotKey}`);
-          if (cell) {
-            renderCellState(cell, mySlots[slotKey] || "no");
-          }
-        });
-      });
-    }
-
-    function setAllPersonalSlots(state) {
-      DAYS.forEach(day => {
-        HOURS.forEach(hour => {
-          const slotKey = `${day.id}_${hour}`;
-          mySlots[slotKey] = state;
-        });
-      });
-      updatePersonalGridVisuals();
-    }
-
-    function saveAvailability() {
-      const rawName = document.getElementById("userName").value.trim();
-      if (!rawName) {
-        alert("Por favor completá tu nombre antes de guardar.");
-        document.getElementById("userName").focus();
-        return;
+        this._bindEvents();
+        this.resize(false);
       }
 
-      const userId = rawName.toLowerCase().replace(/[^a-z0-9]/g, "_");
-      localStorage.setItem("fulbito_username", rawName);
+      resize(preserveDrawing = true) {
+        const rect = this.canvas.getBoundingClientRect();
+        if (rect.width === 0 || rect.height === 0) return;
 
-      const payload = {
-        name: rawName,
-        slots: mySlots,
-        updatedAt: Date.now()
-      };
-
-      responsesRef.child(userId).set(payload)
-        .then(() => {
-          const feedback = document.getElementById("saveFeedback");
-          feedback.classList.remove("hidden");
-          setTimeout(() => feedback.classList.add("hidden"), 3000);
-        })
-        .catch(err => {
-          alert("Error de conexión al guardar: " + err.message);
-        });
-    }
-
-    function loadUserAvailability() {
-      const rawName = document.getElementById("userName").value.trim();
-      if (!rawName) return;
-
-      const userId = rawName.toLowerCase().replace(/[^a-z0-9]/g, "_");
-      if (allResponses[userId]) {
-        mySlots = allResponses[userId].slots || {};
-        updatePersonalGridVisuals();
-        localStorage.setItem("fulbito_username", rawName);
-      }
-    }
-
-    function listenToDatabase() {
-      responsesRef.on("value", snapshot => {
-        allResponses = snapshot.val() || {};
-        buildHeatmapGrid();
-        updateBestSlot();
-        updateVotersList();
-
-        const rawName = document.getElementById("userName").value.trim();
-        if (rawName) {
-          const userId = rawName.toLowerCase().replace(/[^a-z0-9]/g, "_");
-          if (allResponses[userId] && Object.keys(mySlots).length === 0) {
-            mySlots = allResponses[userId].slots || {};
-            updatePersonalGridVisuals();
-          }
+        const targetW = Math.round(rect.width * this.dpr);
+        const targetH = Math.round(rect.height * this.dpr);
+        if (this.canvas.width === targetW && this.canvas.height === targetH) {
+          return;
         }
-      });
-    }
 
-    function buildHeatmapGrid() {
-      const container = document.getElementById("heatmapTableContainer");
-      if (!container) return;
+        let snapshot = null;
+        if (preserveDrawing && this.hasInk) {
+          snapshot = this.canvas.toDataURL('image/png');
+        }
 
-      const totalVoters = Object.keys(allResponses).length;
+        this.canvas.width = targetW;
+        this.canvas.height = targetH;
+        this.ctx.setTransform(this.dpr, 0, 0, this.dpr, 0, 0);
+        this._setupStrokeStyle();
 
-      let html = `
-        <table class="w-full border-collapse text-xs select-none">
-          <thead>
-            <tr class="bg-slate-900 border-b border-slate-800">
-              <th class="sticky left-0 z-30 bg-slate-900 p-2.5 text-center font-bold text-slate-400 min-w-[62px] border-r border-slate-800">
-                Hora
-              </th>`;
+        if (snapshot) {
+          const img = new Image();
+          img.onload = () => {
+            this.ctx.drawImage(img, 0, 0, rect.width, rect.height);
+          };
+          img.src = snapshot;
+        }
+      }
 
-      DAYS.forEach(day => {
-        const isWeekend = day.name === "Sáb" || day.name === "Dom";
-        html += `
-          <th class="p-2 text-center min-w-[68px] sm:min-w-[76px] border-r border-slate-800/80">
-            <div class="text-[10px] font-extrabold uppercase ${isWeekend ? 'text-amber-400' : 'text-emerald-400'}">${day.name}</div>
-            <div class="text-sm font-black text-white">${day.num}</div>
-            <div class="text-[9px] text-slate-500 font-medium">Oct</div>
-          </th>`;
-      });
+      _setupStrokeStyle() {
+        this.ctx.strokeStyle = '#0f172a';
+        this.ctx.fillStyle = '#0f172a';
+        this.ctx.lineWidth = 2.4;
+        this.ctx.lineCap = 'round';
+        this.ctx.lineJoin = 'round';
+      }
 
-      html += `</tr></thead><tbody>`;
+      _getPoint(e) {
+        const rect = this.canvas.getBoundingClientRect();
+        return {
+          x: e.clientX - rect.left,
+          y: e.clientY - rect.top
+        };
+      }
 
-      HOURS.forEach(hour => {
-        html += `<tr class="border-b border-slate-800/60">
-          <td class="sticky left-0 z-20 bg-slate-900 p-2 text-center font-bold text-slate-400 text-[11px] border-r border-slate-800 shadow-[2px_0_5px_rgba(0,0,0,0.3)]">
-            ${hour}
-          </td>`;
+      _bindEvents() {
+        // Bloquea gestos nativos de scroll en iOS Safari mientras se dibuja
+        this.canvas.addEventListener('touchstart', (e) => e.preventDefault(), { passive: false });
+        this.canvas.addEventListener('touchmove', (e) => e.preventDefault(), { passive: false });
 
-        DAYS.forEach(day => {
-          const slotKey = `${day.id}_${hour}`;
-          let yesCount = 0;
-          let maybeCount = 0;
+        this.canvas.addEventListener('pointerdown', (e) => {
+          if (e.button !== undefined && e.button !== 0 && e.pointerType === 'mouse') return;
+          e.preventDefault();
+          this.canvas.setPointerCapture(e.pointerId);
+          this.isDrawing = true;
+          this._setupStrokeStyle();
+          const pt = this._getPoint(e);
+          this.lastPoint = pt;
 
-          Object.values(allResponses).forEach(resp => {
-            const st = resp.slots ? resp.slots[slotKey] : "no";
-            if (st === "yes") yesCount++;
-            else if (st === "maybe") maybeCount++;
-          });
+          // Trazo inicial puntual para que un toque corto o punto se dibuje bien
+          this.ctx.beginPath();
+          this.ctx.arc(pt.x, pt.y, this.ctx.lineWidth / 2, 0, Math.PI * 2);
+          this.ctx.fill();
 
-          let cellStyle = "bg-slate-950 border-slate-800/80 text-slate-600";
-          let label = `<span>0</span>`;
+          if (!this.hasInk) {
+            this.hasInk = true;
+            if (this.placeholder) this.placeholder.classList.add('hidden');
+            this.onChange(true);
+          }
+        });
 
-          if (yesCount > 0) {
-            const ratio = totalVoters > 0 ? (yesCount / totalVoters) : 0;
-            if (ratio >= 0.7 || yesCount >= 6) {
-              cellStyle = "bg-emerald-500 border-emerald-400 text-slate-950 font-black shadow-sm shadow-emerald-500/25";
-            } else if (ratio >= 0.4 || yesCount >= 3) {
-              cellStyle = "bg-emerald-700 border-emerald-600 text-white font-bold";
-            } else {
-              cellStyle = "bg-emerald-950/80 border-emerald-800/80 text-emerald-300 font-medium";
+        this.canvas.addEventListener('pointermove', (e) => {
+          if (!this.isDrawing) return;
+          e.preventDefault();
+          const pt = this._getPoint(e);
+          const mid = {
+            x: (this.lastPoint.x + pt.x) / 2,
+            y: (this.lastPoint.y + pt.y) / 2
+          };
+
+          this.ctx.beginPath();
+          this.ctx.moveTo(this.lastPoint.x, this.lastPoint.y);
+          this.ctx.quadraticCurveTo(this.lastPoint.x, this.lastPoint.y, mid.x, mid.y);
+          this.ctx.lineTo(pt.x, pt.y);
+          this.ctx.stroke();
+
+          this.lastPoint = pt;
+        });
+
+        const endStroke = (e) => {
+          if (!this.isDrawing) return;
+          this.isDrawing = false;
+          this.lastPoint = null;
+          try {
+            if (e && e.pointerId !== undefined) {
+              this.canvas.releasePointerCapture(e.pointerId);
             }
-            label = `<span>${yesCount}</span>` + (maybeCount > 0 ? `<span class="text-[9px] opacity-80">+${maybeCount}?</span>` : "");
-          } else if (maybeCount > 0) {
-            cellStyle = "bg-amber-950/70 border-amber-800/70 text-amber-300 font-medium";
-            label = `<span>${maybeCount}?</span>`;
+          } catch (_) {}
+        };
+
+        this.canvas.addEventListener('pointerup', endStroke);
+        this.canvas.addEventListener('pointercancel', endStroke);
+        this.canvas.addEventListener('lostpointercapture', endStroke);
+      }
+
+      clear() {
+        const rect = this.canvas.getBoundingClientRect();
+        this.ctx.clearRect(0, 0, rect.width || this.canvas.width, rect.height || this.canvas.height);
+        this.hasInk = false;
+        this.isDrawing = false;
+        this.lastPoint = null;
+        if (this.placeholder) this.placeholder.classList.remove('hidden');
+        this.onChange(false);
+      }
+
+      isEmpty() {
+        return !this.hasInk;
+      }
+
+      // Devuelve PNG transparente recortado alrededor de la firma para incrustar prolijo en el PDF
+      toTrimmedPNG() {
+        if (!this.hasInk) return null;
+        const w = this.canvas.width;
+        const h = this.canvas.height;
+        const imgData = this.ctx.getImageData(0, 0, w, h).data;
+
+        let minX = w, minY = h, maxX = 0, maxY = 0;
+        let found = false;
+
+        for (let y = 0; y < h; y++) {
+          for (let x = 0; x < w; x++) {
+            const alpha = imgData[(y * w + x) * 4 + 3];
+            if (alpha > 10) {
+              if (x < minX) minX = x;
+              if (y < minY) minY = y;
+              if (x > maxX) maxX = x;
+              if (y > maxY) maxY = y;
+              found = true;
+            }
           }
+        }
 
-          html += `
-            <td class="p-1 border-r border-slate-800/60 text-center">
-              <button type="button" onclick="openSlotModal('${slotKey}', '${day.full}', '${hour}')"
-                class="w-full h-10 rounded-lg border flex flex-col items-center justify-center transition-all cursor-pointer ${cellStyle}">
-                ${label}
-              </button>
-            </td>`;
-        });
+        if (!found) return null;
 
-        html += `</tr>`;
-      });
+        const pad = 16;
+        const sx = Math.max(0, minX - pad);
+        const sy = Math.max(0, minY - pad);
+        const sw = Math.min(w - sx, (maxX - minX) + pad * 2);
+        const sh = Math.min(h - sy, (maxY - minY) + pad * 2);
 
-      html += `</tbody></table>`;
-      container.innerHTML = html;
+        const out = document.createElement('canvas');
+        out.width = sw;
+        out.height = sh;
+        out.getContext('2d').drawImage(this.canvas, sx, sy, sw, sh, 0, 0, sw, sh);
+
+        return {
+          dataUrl: out.toDataURL('image/png'),
+          width: sw,
+          height: sh
+        };
+      }
     }
 
-    function updateBestSlot() {
-      let bestSlot = null;
-      let maxYes = -1;
-      let bestMaybes = 0;
+    // =========================================================================
+    // UTILIDADES DE FORMATO Y LIMPIEZA
+    // =========================================================================
+    function cleanDocumentId(value) {
+      return String(value || '')
+        .toUpperCase()
+        .replace(/[^A-Z0-9]/g, '');
+    }
 
-      DAYS.forEach(day => {
-        HOURS.forEach(hour => {
-          const slotKey = `${day.id}_${hour}`;
-          let yesCount = 0;
-          let maybeCount = 0;
-          Object.values(allResponses).forEach(resp => {
-            const st = resp.slots ? resp.slots[slotKey] : "no";
-            if (st === "yes") yesCount++;
-            else if (st === "maybe") maybeCount++;
-          });
+    function sanitizeFileNameSegment(str) {
+      return String(str || '')
+        .trim()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .replace(/[^a-zA-Z0-9\u4e00-\u9fff\s_-]/g, '')
+        .replace(/\s+/g, '_')
+        .replace(/_+/g, '_')
+        .replace(/^_|_$/g, '') || 'Participante';
+    }
 
-          if (yesCount > maxYes || (yesCount === maxYes && maybeCount > bestMaybes)) {
-            maxYes = yesCount;
-            bestMaybes = maybeCount;
-            bestSlot = `${day.full} a las ${hour} hs`;
+    function formatDateTimeAR(date) {
+      const pad = (n) => String(n).padStart(2, '0');
+      return `${pad(date.getDate())}/${pad(date.getMonth() + 1)}/${date.getFullYear()} ${pad(date.getHours())}:${pad(date.getMinutes())}`;
+    }
+
+    // =========================================================================
+    // RENDERIZADO DE LAS 13 NORMAS GENERALES EN EL DOM
+    // =========================================================================
+    function renderRulesList() {
+      const list = document.getElementById('rulesList');
+      list.innerHTML = NORMAS_GENERALES.map((rule) => `
+        <li class="py-3 first:pt-1 last:pb-1 flex items-start gap-3">
+          <span class="w-6 h-6 rounded-md bg-brand-100 text-brand-800 text-xs font-bold flex items-center justify-center shrink-0 mt-0.5">
+            ${rule.num}
+          </span>
+          <div class="space-y-1 text-xs sm:text-sm leading-relaxed">
+            <p class="text-slate-800 font-medium">${escapeHtml(rule.es)}</p>
+            <p class="text-slate-500">${escapeHtml(rule.zh)}</p>
+          </div>
+        </li>
+      `).join('');
+    }
+
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    // =========================================================================
+    // ACTUALIZACIÓN DINÁMICA DE LA CLÁUSULA DEL TUTOR (BLOQUE B)
+    // =========================================================================
+    function updateDynamicMinorClause() {
+      const minorName = document.getElementById('nombreSolicitante').value.trim();
+      const minorDni = cleanDocumentId(document.getElementById('dniSolicitante').value);
+      const tutorName = document.getElementById('nombreTutor').value.trim();
+      const tutorDni = cleanDocumentId(document.getElementById('dniTutor').value);
+
+      document.getElementById('dynMinorNameEs').textContent = minorName || '[Nombre del Menor]';
+      document.getElementById('dynMinorDniEs').textContent = minorDni || '[DNI/Pasaporte del Menor]';
+      document.getElementById('dynTutorNameEs').textContent = tutorName || '[Nombre del Padre, Madre o Tutor]';
+      document.getElementById('dynTutorDniEs').textContent = tutorDni || '[DNI/Pasaporte]';
+
+      document.getElementById('dynMinorNameZh').textContent = minorName || '[參加者姓名]';
+      document.getElementById('dynMinorDniZh').textContent = minorDni || '[參加者證件號碼]';
+      document.getElementById('dynTutorNameZh').textContent = tutorName || '[父母或監護人姓名]';
+      document.getElementById('dynTutorDniZh').textContent = tutorDni || '[證件號碼]';
+    }
+
+    // =========================================================================
+    // GENERADOR DE PDF A4 BILINGÜE EN ALTA RESOLUCIÓN (CON SOPORTE CHINO TRADICIONAL)
+    // =========================================================================
+    const PDF_FONT_STACK = '"Inter", "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", "Heiti TC", Arial, sans-serif';
+
+    // Envuelve texto manejando tanto palabras con espacios (español) como caracteres CJK sin espacios
+    function wrapBilingualText(ctx, text, maxWidth) {
+      const lines = [];
+      const paragraphs = String(text || '').split('\n');
+
+      for (const paragraph of paragraphs) {
+        if (!paragraph) {
+          lines.push('');
+          continue;
+        }
+        // Tokenizar manteniendo espacios, palabras latinas y caracteres CJK individuales
+        const tokens = paragraph.match(/([A-Za-z0-9À-ÿÑñÜü"“”'‘’().,:;/-]+|\s+|.)/g) || [];
+        let current = '';
+
+        for (const token of tokens) {
+          const testLine = current + token;
+          if (ctx.measureText(testLine).width <= maxWidth || current === '') {
+            current = testLine;
+          } else {
+            lines.push(current.trimEnd());
+            current = token.trimStart();
           }
-        });
-      });
+        }
+        if (current) lines.push(current.trimEnd());
+      }
+      return lines;
+    }
 
-      const textElem = document.getElementById("bestSlotText");
-      const countElem = document.getElementById("bestSlotCount");
-      if (textElem && countElem) {
-        if (maxYes > 0) {
-          textElem.innerText = bestSlot;
-          countElem.innerText = `${maxYes}`;
-        } else {
-          textElem.innerText = "Aún no hay coincidencias";
-          countElem.innerText = "0";
+    function drawWrappedText(ctx, text, x, y, maxWidth, lineHeight) {
+      const lines = wrapBilingualText(ctx, text, maxWidth);
+      for (const line of lines) {
+        ctx.fillText(line, x, y);
+        y += lineHeight;
+      }
+      return y;
+    }
+
+    function createA4Canvas() {
+      // 1654 x 2339 px ≈ 200 DPI en hoja A4 (210 x 297 mm)
+      const canvas = document.createElement('canvas');
+      canvas.width = 1654;
+      canvas.height = 2339;
+      const ctx = canvas.getContext('2d');
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.textBaseline = 'top';
+      return { canvas, ctx, W: canvas.width, H: canvas.height };
+    }
+
+    function drawDocumentHeader(ctx, W, pageNum, totalPages) {
+      // Banda superior sobria institucional
+      ctx.fillStyle = '#0b1b2e';
+      ctx.fillRect(0, 0, W, 178);
+
+      // Línea dorada sutil inferior
+      ctx.fillStyle = '#d97706';
+      ctx.fillRect(0, 178, W, 7);
+
+      const mx = 100;
+      ctx.fillStyle = '#fbbf24';
+      ctx.font = `700 22px ${PDF_FONT_STACK}`;
+      ctx.fillText('IGLESIA PRESBITERIANA DE TAIWÁN EN ARGENTINA (IPTA)  ·  阿根廷基督長老教會', mx, 34);
+
+      ctx.fillStyle = '#ffffff';
+      ctx.font = `800 38px ${PDF_FONT_STACK}`;
+      ctx.fillText('ACEPTACIÓN DE NORMAS Y AUTORIZACIÓN', mx, 72);
+
+      ctx.fillStyle = '#cbd5e1';
+      ctx.font = `500 25px ${PDF_FONT_STACK}`;
+      ctx.fillText('Campamento de Verano 2027 "OVERCOMERS"  |  2027年夏令營「得勝者」規則同意書與授權書', mx, 126);
+
+      // Indicador de página en esquina superior derecha
+      ctx.textAlign = 'right';
+      ctx.fillStyle = '#94a3b8';
+      ctx.font = `600 20px ${PDF_FONT_STACK}`;
+      ctx.fillText(`Página ${pageNum} / ${totalPages}`, W - mx, 36);
+      ctx.textAlign = 'left';
+    }
+
+    function drawDocumentFooter(ctx, W, H, timestampText, pageNum, totalPages) {
+      const mx = 100;
+      const fy = H - 82;
+      ctx.strokeStyle = '#e2e8f0';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(mx, fy - 14);
+      ctx.lineTo(W - mx, fy - 14);
+      ctx.stroke();
+
+      ctx.fillStyle = '#64748b';
+      ctx.font = `400 19px ${PDF_FONT_STACK}`;
+      ctx.fillText(`Documento generado digitalmente — OVERCOMERS 2027 (IPTA) · Fecha: ${timestampText}`, mx, fy);
+
+      ctx.textAlign = 'right';
+      ctx.fillText(`Pág. ${pageNum} de ${totalPages}`, W - mx, fy);
+      ctx.textAlign = 'left';
+    }
+
+    function fitSignatureBox(sigObj, boxMm) {
+      const aspect = sigObj.width / sigObj.height;
+      let drawW = boxMm.w;
+      let drawH = drawW / aspect;
+      if (drawH > boxMm.h) {
+        drawH = boxMm.h;
+        drawW = drawH * aspect;
+      }
+      const x = boxMm.x + (boxMm.w - drawW) / 2;
+      const y = boxMm.y + (boxMm.h - drawH); // Apoyada sobre la línea de firma
+      return { x, y, w: drawW, h: drawH };
+    }
+
+    async function generateAuthorizationPDF(payload) {
+      if (document.fonts && document.fonts.ready) {
+        try {
+          await document.fonts.ready;
+        } catch (_) {}
+      }
+
+      const timestampText = formatDateTimeAR(new Date());
+      const mx = 100;
+      const contentW = 1654 - mx * 2; // 1454 px
+
+      // ======================== PÁGINA 1: 13 NORMAS GENERALES ========================
+      const p1 = createA4Canvas();
+      drawDocumentHeader(p1.ctx, p1.W, 1, 2);
+
+      let y = 218;
+      // Título de sección
+      p1.ctx.fillStyle = '#0f172a';
+      p1.ctx.font = `800 29px ${PDF_FONT_STACK}`;
+      p1.ctx.fillText('NORMAS GENERALES  /  營會一般規則', mx, y);
+      y += 44;
+
+      p1.ctx.strokeStyle = '#1f4470';
+      p1.ctx.lineWidth = 3;
+      p1.ctx.beginPath();
+      p1.ctx.moveTo(mx, y);
+      p1.ctx.lineTo(mx + 460, y);
+      p1.ctx.stroke();
+      y += 22;
+
+      for (const rule of NORMAS_GENERALES) {
+        const numBoxW = 46;
+        const textX = mx + numBoxW + 14;
+        const textMaxW = contentW - numBoxW - 14;
+
+        // Badge numérico
+        p1.ctx.fillStyle = '#e8eff7';
+        p1.ctx.fillRect(mx, y + 2, numBoxW, 34);
+        p1.ctx.fillStyle = '#173457';
+        p1.ctx.font = `700 21px ${PDF_FONT_STACK}`;
+        p1.ctx.textAlign = 'center';
+        p1.ctx.fillText(String(rule.num), mx + numBoxW / 2, y + 8);
+        p1.ctx.textAlign = 'left';
+
+        // Texto en Español
+        p1.ctx.fillStyle = '#0f172a';
+        p1.ctx.font = `600 22px ${PDF_FONT_STACK}`;
+        let nextY = drawWrappedText(p1.ctx, rule.es, textX, y, textMaxW, 30);
+
+        // Texto en Chino Tradicional
+        p1.ctx.fillStyle = '#475569';
+        p1.ctx.font = `400 21px ${PDF_FONT_STACK}`;
+        nextY = drawWrappedText(p1.ctx, rule.zh, textX, nextY + 3, textMaxW, 29);
+
+        y = nextY + 14;
+
+        if (rule.num < 13) {
+          p1.ctx.strokeStyle = '#e2e8f0';
+          p1.ctx.lineWidth = 1.2;
+          p1.ctx.beginPath();
+          p1.ctx.moveTo(mx, y - 6);
+          p1.ctx.lineTo(p1.W - mx, y - 6);
+          p1.ctx.stroke();
         }
       }
-    }
 
-    function updateVotersList() {
-      const voters = Object.values(allResponses).map(r => r.name);
-      const totalElem = document.getElementById("totalVoters");
-      const container = document.getElementById("votersList");
-      if (totalElem) totalElem.innerText = voters.length;
-      if (!container) return;
-      container.innerHTML = "";
+      // Sello de aceptación en pie de Página 1
+      y = Math.min(y + 18, p1.H - 185);
+      p1.ctx.fillStyle = '#f0fdf4';
+      p1.ctx.strokeStyle = '#86efac';
+      p1.ctx.lineWidth = 2;
+      p1.ctx.fillRect(mx, y, contentW, 66);
+      p1.ctx.strokeRect(mx, y, contentW, 66);
 
-      if (voters.length === 0) {
-        container.innerHTML = `<span class="text-slate-500">Nadie cargó todavía. ¡Sé el primero!</span>`;
-        return;
-      }
+      p1.ctx.fillStyle = '#166534';
+      p1.ctx.font = `700 22px ${PDF_FONT_STACK}`;
+      p1.ctx.fillText('☑  Leí y acepto las 13 Normas Generales  /  我已閱讀並同意以上規則', mx + 24, y + 20);
 
-      voters.forEach(name => {
-        const badge = document.createElement("span");
-        badge.className = "px-3 py-1 bg-slate-800 text-slate-300 rounded-lg border border-slate-700 font-medium";
-        badge.innerText = name;
-        container.appendChild(badge);
-      });
-    }
+      drawDocumentFooter(p1.ctx, p1.W, p1.H, timestampText, 1, 2);
 
-    function openSlotModal(slotKey, dayFull, hour) {
-      document.getElementById("modalSlotTitle").innerText = `${dayFull}`;
-      document.getElementById("modalSlotSubtitle").innerText = `${hour} hs`;
+      // ======================== PÁGINA 2: DECLARACIÓN, AUTORIZACIÓN Y FIRMAS ========================
+      const p2 = createA4Canvas();
+      drawDocumentHeader(p2.ctx, p2.W, 2, 2);
 
-      const yesList = [];
-      const maybeList = [];
-      const noList = [];
+      // Factor de conversión px -> mm para colocar las firmas PNG transparentes con precisión exacta
+      const pxToMm = 210 / p2.W;
+      let y2 = 222;
 
-      Object.values(allResponses).forEach(resp => {
-        const state = resp.slots ? resp.slots[slotKey] : "no";
-        if (state === "yes") yesList.push(resp.name);
-        else if (state === "maybe") maybeList.push(resp.name);
-        else noList.push(resp.name);
-      });
+      // ---------- BLOQUE A: SOLICITANTE ----------
+      p2.ctx.fillStyle = '#173457';
+      p2.ctx.fillRect(mx, y2, contentW, 50);
+      p2.ctx.fillStyle = '#ffffff';
+      p2.ctx.font = `700 24px ${PDF_FONT_STACK}`;
+      p2.ctx.fillText('1. DECLARACIÓN Y FIRMA DEL SOLICITANTE  /  參加者聲明與簽名', mx + 22, y2 + 12);
+      y2 += 70;
 
-      document.getElementById("countYes").innerText = yesList.length;
-      document.getElementById("countMaybe").innerText = maybeList.length;
-      document.getElementById("countNo").innerText = noList.length;
+      // Texto legal Bloque A
+      p2.ctx.fillStyle = '#0f172a';
+      p2.ctx.font = `500 23px ${PDF_FONT_STACK}`;
+      y2 = drawWrappedText(p2.ctx, TEXTOS_LEGALES.bloqueA_es, mx, y2, contentW, 33);
+      y2 += 8;
+      p2.ctx.fillStyle = '#475569';
+      p2.ctx.font = `400 22px ${PDF_FONT_STACK}`;
+      y2 = drawWrappedText(p2.ctx, TEXTOS_LEGALES.bloqueA_zh, mx, y2, contentW, 32);
+      y2 += 24;
 
-      document.getElementById("modalAvailableList").innerText = yesList.length ? yesList.join(", ") : "Nadie";
-      document.getElementById("modalMaybeList").innerText = maybeList.length ? maybeList.join(", ") : "Nadie";
-      document.getElementById("modalUnavailableList").innerText = noList.length ? noList.join(", ") : "Nadie";
+      // Recuadro de datos del solicitante
+      const boxAH = 152;
+      p2.ctx.fillStyle = '#f8fafc';
+      p2.ctx.strokeStyle = '#cbd5e1';
+      p2.ctx.lineWidth = 2;
+      p2.ctx.fillRect(mx, y2, contentW, boxAH);
+      p2.ctx.strokeRect(mx, y2, contentW, boxAH);
 
-      document.getElementById("slotModal").classList.remove("hidden");
-    }
+      const halfW = contentW / 2;
+      p2.ctx.fillStyle = '#64748b';
+      p2.ctx.font = `600 19px ${PDF_FONT_STACK}`;
+      p2.ctx.fillText('Nombre y Apellido / 姓名:', mx + 22, y2 + 18);
+      p2.ctx.fillText('DNI o Pasaporte / 身分證/護照號碼:', mx + halfW + 22, y2 + 18);
 
-    function closeModal() {
-      document.getElementById("slotModal").classList.add("hidden");
-    }
+      p2.ctx.fillStyle = '#0f172a';
+      p2.ctx.font = `700 26px ${PDF_FONT_STACK}`;
+      p2.ctx.fillText(payload.nombreSolicitante, mx + 22, y2 + 46);
+      p2.ctx.fillText(payload.dniSolicitante, mx + halfW + 22, y2 + 46);
 
-    function switchTab(tab) {
-      const viewPersonal = document.getElementById("viewPersonal");
-      const viewGroup = document.getElementById("viewGroup");
-      const tabPersonal = document.getElementById("tabMyAvailability");
-      const tabGroup = document.getElementById("tabGroupHeatmap");
+      p2.ctx.fillStyle = '#64748b';
+      p2.ctx.font = `600 19px ${PDF_FONT_STACK}`;
+      p2.ctx.fillText('Edad al 25/01/2027 / 營會開始時年齡:', mx + 22, y2 + 94);
+      p2.ctx.fillText('Fecha y hora / 簽署日期:', mx + halfW + 22, y2 + 94);
 
-      if (tab === "my") {
-        viewPersonal.classList.remove("hidden");
-        viewGroup.classList.add("hidden");
-        tabPersonal.className = "flex-1 py-2 text-xs sm:text-sm font-bold rounded-lg bg-emerald-600 text-white transition-all shadow-md";
-        tabGroup.className = "flex-1 py-2 text-xs sm:text-sm font-semibold rounded-lg text-slate-400 hover:text-white transition-all";
+      p2.ctx.fillStyle = '#0f172a';
+      p2.ctx.font = `600 22px ${PDF_FONT_STACK}`;
+      p2.ctx.fillText(
+        payload.esMayor ? 'Mayor de 18 años / 已滿 18 歲' : 'Menor de 18 años / 未滿 18 歲',
+        mx + 22,
+        y2 + 120
+      );
+      p2.ctx.fillText(timestampText, mx + halfW + 22, y2 + 120);
+
+      y2 += boxAH + 28;
+
+      // Zona de firma del solicitante (línea sobre la que se incrustará el PNG transparente)
+      const sigSolBoxPx = { x: mx + 360, y: y2 + 8, w: 730, h: 175 };
+      const sigSolLineY = sigSolBoxPx.y + sigSolBoxPx.h + 8;
+
+      p2.ctx.strokeStyle = '#334155';
+      p2.ctx.lineWidth = 2.2;
+      p2.ctx.beginPath();
+      p2.ctx.moveTo(mx + 340, sigSolLineY);
+      p2.ctx.lineTo(mx + 1110, sigSolLineY);
+      p2.ctx.stroke();
+
+      p2.ctx.fillStyle = '#475569';
+      p2.ctx.font = `600 20px ${PDF_FONT_STACK}`;
+      p2.ctx.textAlign = 'center';
+      p2.ctx.fillText('Firma del Solicitante  /  參加者簽名', mx + 725, sigSolLineY + 12);
+      p2.ctx.textAlign = 'left';
+
+      y2 = sigSolLineY + 66;
+
+      // ---------- BLOQUE B: AUTORIZACIÓN DE PADRE, MADRE O TUTOR ----------
+      let sigTutorBoxPx = null;
+
+      p2.ctx.fillStyle = payload.esMayor ? '#64748b' : '#b45309';
+      p2.ctx.fillRect(mx, y2, contentW, 50);
+      p2.ctx.fillStyle = '#ffffff';
+      p2.ctx.font = `700 23px ${PDF_FONT_STACK}`;
+      p2.ctx.fillText('2. AUTORIZACIÓN DEL PADRE, MADRE O TUTOR (MENORES DE 18 AÑOS) / 父母或監護人同意書', mx + 22, y2 + 12);
+      y2 += 68;
+
+      if (payload.esMayor) {
+        p2.ctx.fillStyle = '#f8fafc';
+        p2.ctx.strokeStyle = '#cbd5e1';
+        p2.ctx.lineWidth = 2;
+        p2.ctx.fillRect(mx, y2, contentW, 110);
+        p2.ctx.strokeRect(mx, y2, contentW, 110);
+
+        p2.ctx.fillStyle = '#475569';
+        p2.ctx.font = `600 23px ${PDF_FONT_STACK}`;
+        p2.ctx.fillText('No aplica — El/la solicitante declara ser mayor de 18 años al inicio del campamento (25/01/2027).', mx + 26, y2 + 24);
+        p2.ctx.font = `400 22px ${PDF_FONT_STACK}`;
+        p2.ctx.fillText('不適用 — 參加者聲明在營會開始時（2027年1月25日）已滿 18 歲。', mx + 26, y2 + 62);
+        y2 += 152;
       } else {
-        viewPersonal.classList.add("hidden");
-        viewGroup.classList.remove("hidden");
-        tabPersonal.className = "flex-1 py-2 text-xs sm:text-sm font-semibold rounded-lg text-slate-400 hover:text-white transition-all";
-        tabGroup.className = "flex-1 py-2 text-xs sm:text-sm font-bold rounded-lg bg-emerald-600 text-white transition-all shadow-md";
+        const clausulaTutorEs = `Yo, ${payload.nombreTutor}, con DNI/Pasaporte N.º ${payload.dniTutor}, en mi carácter de padre, madre o tutor legal de ${payload.nombreSolicitante}, con DNI/Pasaporte N.º ${payload.dniSolicitante}, autorizo su participación en el Campamento de Verano 2027 "OVERCOMERS" de la Iglesia Presbiteriana de Taiwán en Argentina (IPTA), declaro haber leído y aceptado las NORMAS GENERALES y asumo plena responsabilidad por su comportamiento y seguridad.`;
+        const clausulaTutorZh = `本人 ${payload.nombreTutor}（身分證/護照號碼：${payload.dniTutor}），身為未成年參加者 ${payload.nombreSolicitante}（身分證/護照號碼：${payload.dniSolicitante}）之父母或監護人，茲同意其參加阿根廷基督長老教會(IPTA)2027年夏令營「得勝者」，並聲明已閱讀及同意上述一般規則，願對其舉止及安全負全責。`;
+
+        p2.ctx.fillStyle = '#0f172a';
+        p2.ctx.font = `500 22px ${PDF_FONT_STACK}`;
+        y2 = drawWrappedText(p2.ctx, clausulaTutorEs, mx, y2, contentW, 31);
+        y2 += 8;
+        p2.ctx.fillStyle = '#475569';
+        p2.ctx.font = `400 21px ${PDF_FONT_STACK}`;
+        y2 = drawWrappedText(p2.ctx, clausulaTutorZh, mx, y2, contentW, 30);
+        y2 += 20;
+
+        // Datos del tutor
+        const boxBH = 92;
+        p2.ctx.fillStyle = '#fffbeb';
+        p2.ctx.strokeStyle = '#fcd34d';
+        p2.ctx.lineWidth = 2;
+        p2.ctx.fillRect(mx, y2, contentW, boxBH);
+        p2.ctx.strokeRect(mx, y2, contentW, boxBH);
+
+        p2.ctx.fillStyle = '#92400e';
+        p2.ctx.font = `600 19px ${PDF_FONT_STACK}`;
+        p2.ctx.fillText('Padre, Madre o Tutor / 父母或監護人姓名:', mx + 22, y2 + 16);
+        p2.ctx.fillText('DNI o Pasaporte / 身分證/護照號碼:', mx + halfW + 22, y2 + 16);
+
+        p2.ctx.fillStyle = '#0f172a';
+        p2.ctx.font = `700 25px ${PDF_FONT_STACK}`;
+        p2.ctx.fillText(payload.nombreTutor, mx + 22, y2 + 44);
+        p2.ctx.fillText(payload.dniTutor, mx + halfW + 22, y2 + 44);
+
+        y2 += boxBH + 22;
+
+        // Zona de firma del tutor
+        sigTutorBoxPx = { x: mx + 360, y: y2 + 6, w: 730, h: 170 };
+        const sigTutLineY = sigTutorBoxPx.y + sigTutorBoxPx.h + 8;
+
+        p2.ctx.strokeStyle = '#334155';
+        p2.ctx.lineWidth = 2.2;
+        p2.ctx.beginPath();
+        p2.ctx.moveTo(mx + 340, sigTutLineY);
+        p2.ctx.lineTo(mx + 1110, sigTutLineY);
+        p2.ctx.stroke();
+
+        p2.ctx.fillStyle = '#475569';
+        p2.ctx.font = `600 20px ${PDF_FONT_STACK}`;
+        p2.ctx.textAlign = 'center';
+        p2.ctx.fillText('Firma del Padre, Madre o Tutor  /  父母或監護人簽名', mx + 725, sigTutLineY + 12);
+        p2.ctx.textAlign = 'left';
+
+        y2 = sigTutLineY + 64;
       }
+
+      // ---------- BLOQUE C: CLÁUSULA DE IMAGEN (PARA TODOS) ----------
+      const imgBoxY = Math.max(y2 + 12, p2.H - 385);
+      const imgBoxH = 250;
+
+      p2.ctx.fillStyle = '#f1f5f9';
+      p2.ctx.strokeStyle = '#94a3b8';
+      p2.ctx.lineWidth = 2.2;
+      p2.ctx.fillRect(mx, imgBoxY, contentW, imgBoxH);
+      p2.ctx.strokeRect(mx, imgBoxY, contentW, imgBoxH);
+
+      let iy = imgBoxY + 22;
+      p2.ctx.fillStyle = '#0f172a';
+      p2.ctx.font = `800 22px ${PDF_FONT_STACK}`;
+      p2.ctx.fillText('3. AUTORIZACIÓN DE USO DE IMAGEN — IMPORTANTE / 注意事項', mx + 24, iy);
+      iy += 36;
+
+      p2.ctx.fillStyle = '#1e293b';
+      p2.ctx.font = `500 21px ${PDF_FONT_STACK}`;
+      iy = drawWrappedText(
+        p2.ctx,
+        'Durante el campamento se tomarán fotografías y videos de los participantes por parte de la Coordinación. Por la presente se autoriza a IPTA/la Coordinación a usar la imagen del acampante en fotografías y videos para fines promocionales.',
+        mx + 24,
+        iy,
+        contentW - 48,
+        30
+      );
+      iy += 10;
+
+      p2.ctx.fillStyle = '#475569';
+      p2.ctx.font = `400 21px ${PDF_FONT_STACK}`;
+      drawWrappedText(
+        p2.ctx,
+        '營會期間大會將拍攝參加者的照片及影片。本人特此授權IPTA及大會在宣傳用途的照片及影片中使用參加者的肖像。',
+        mx + 24,
+        iy,
+        contentW - 48,
+        30
+      );
+
+      drawDocumentFooter(p2.ctx, p2.W, p2.H, timestampText, 2, 2);
+
+      // ======================== ENSAMBLAJE EN jsPDF (A4) ========================
+      const { jsPDF } = window.jspdf;
+      const pdf = new jsPDF({
+        orientation: 'portrait',
+        unit: 'mm',
+        format: 'a4',
+        compress: true
+      });
+
+      // Página 1
+      pdf.addImage(p1.canvas.toDataURL('image/jpeg', 0.88), 'JPEG', 0, 0, 210, 297, undefined, 'FAST');
+
+      // Página 2
+      pdf.addPage();
+      pdf.addImage(p2.canvas.toDataURL('image/jpeg', 0.88), 'JPEG', 0, 0, 210, 297, undefined, 'FAST');
+
+      // Incrustar firma PNG transparente del Solicitante directamente sobre la línea
+      if (payload.sigSolicitante) {
+        const boxMm = {
+          x: sigSolBoxPx.x * pxToMm,
+          y: sigSolBoxPx.y * pxToMm,
+          w: sigSolBoxPx.w * pxToMm,
+          h: sigSolBoxPx.h * pxToMm
+        };
+        const placed = fitSignatureBox(payload.sigSolicitante, boxMm);
+        pdf.addImage(payload.sigSolicitante.dataUrl, 'PNG', placed.x, placed.y, placed.w, placed.h);
+      }
+
+      // Incrustar firma PNG transparente del Tutor directamente sobre su línea (si es menor)
+      if (!payload.esMayor && payload.sigTutor && sigTutorBoxPx) {
+        const boxMm = {
+          x: sigTutorBoxPx.x * pxToMm,
+          y: sigTutorBoxPx.y * pxToMm,
+          w: sigTutorBoxPx.w * pxToMm,
+          h: sigTutorBoxPx.h * pxToMm
+        };
+        const placed = fitSignatureBox(payload.sigTutor, boxMm);
+        pdf.addImage(payload.sigTutor.dataUrl, 'PNG', placed.x, placed.y, placed.w, placed.h);
+      }
+
+      const dataUri = pdf.output('datauristring');
+      const pdfBase64 = dataUri.split(',')[1];
+      const pdfBlob = pdf.output('blob');
+
+      return { pdfBase64, pdfBlob };
     }
 
-    document.addEventListener("DOMContentLoaded", initApp);
+    // =========================================================================
+    // INICIALIZACIÓN E INTERACCIÓN DE LA INTERFAZ
+    // =========================================================================
+    document.addEventListener('DOMContentLoaded', () => {
+      renderRulesList();
+
+      const sigSolicitante = new SignaturePad('canvasSolicitante', 'sigSolicitantePlaceholder', (hasInk) => {
+        if (hasInk) {
+          document.getElementById('errSigSolicitante').classList.add('hidden');
+          document.getElementById('sigSolicitanteBox').classList.remove('border-rose-400', 'bg-rose-50/30');
+        }
+      });
+
+      const sigTutor = new SignaturePad('canvasTutor', 'sigTutorPlaceholder', (hasInk) => {
+        if (hasInk) {
+          document.getElementById('errSigTutor').classList.add('hidden');
+          document.getElementById('sigTutorBox').classList.remove('border-rose-400', 'bg-rose-50/30');
+        }
+      });
+
+      // Redimensionar canvases ante rotación de pantalla
+      let resizeTimer;
+      window.addEventListener('resize', () => {
+        clearTimeout(resizeTimer);
+        resizeTimer = setTimeout(() => {
+          sigSolicitante.resize(true);
+          if (state.esMayor === false) sigTutor.resize(true);
+        }, 150);
+      });
+
+      // Acordeón de 13 Normas Generales
+      const toggleRulesBtn = document.getElementById('toggleRulesBtn');
+      const rulesPanel = document.getElementById('rulesAccordionPanel');
+      const toggleRulesLabel = document.getElementById('toggleRulesLabel');
+      const toggleRulesIcon = document.getElementById('toggleRulesIcon');
+
+      toggleRulesBtn.addEventListener('click', () => {
+        const isExpanded = toggleRulesBtn.getAttribute('aria-expanded') === 'true';
+        toggleRulesBtn.setAttribute('aria-expanded', String(!isExpanded));
+        rulesPanel.classList.toggle('hidden', isExpanded);
+        toggleRulesIcon.classList.toggle('rotate-180', !isExpanded);
+        toggleRulesLabel.textContent = isExpanded ? 'Ver normas / 展開規則' : 'Ocultar / 收合';
+      });
+
+      // Checkbox de aceptación
+      const acceptRulesCheckbox = document.getElementById('acceptRulesCheckbox');
+      const acceptRulesContainer = document.getElementById('acceptRulesContainer');
+      acceptRulesCheckbox.addEventListener('change', () => {
+        if (acceptRulesCheckbox.checked) {
+          acceptRulesContainer.classList.add('border-emerald-500', 'bg-emerald-50/60');
+          acceptRulesContainer.classList.remove('border-slate-200', 'border-rose-400', 'bg-rose-50/40');
+          document.getElementById('errAcceptRules').classList.add('hidden');
+        } else {
+          acceptRulesContainer.classList.remove('border-emerald-500', 'bg-emerald-50/60');
+          acceptRulesContainer.classList.add('border-slate-200');
+        }
+      });
+
+      // Selector de edad (Paso 2)
+      const btnMayor = document.getElementById('btnMayor');
+      const btnMenor = document.getElementById('btnMenor');
+      const blockBCard = document.getElementById('blockBCard');
+
+      function selectAge(isAdult) {
+        state.esMayor = isAdult;
+        document.getElementById('errAgeChoice').classList.add('hidden');
+
+        [btnMayor, btnMenor].forEach((btn) => {
+          const selected = (btn === btnMayor && isAdult) || (btn === btnMenor && !isAdult);
+          const dot = btn.querySelector('.age-radio-dot');
+          const check = dot.querySelector('svg');
+
+          if (selected) {
+            btn.classList.add('border-brand-700', 'bg-brand-50/70', 'ring-2', 'ring-brand-600/20');
+            btn.classList.remove('border-slate-200', 'bg-white');
+            dot.classList.add('bg-brand-700', 'border-brand-700');
+            dot.classList.remove('border-slate-300');
+            check.classList.remove('hidden');
+          } else {
+            btn.classList.remove('border-brand-700', 'bg-brand-50/70', 'ring-2', 'ring-brand-600/20');
+            btn.classList.add('border-slate-200', 'bg-white');
+            dot.classList.remove('bg-brand-700', 'border-brand-700');
+            dot.classList.add('border-slate-300');
+            check.classList.add('hidden');
+          }
+        });
+
+        if (!isAdult) {
+          blockBCard.classList.remove('hidden');
+          updateDynamicMinorClause();
+          // Ajustar tamaño del canvas del tutor recién visible
+          requestAnimationFrame(() => sigTutor.resize(true));
+        } else {
+          blockBCard.classList.add('hidden');
+        }
+      }
+
+      btnMayor.addEventListener('click', () => selectAge(true));
+      btnMenor.addEventListener('click', () => selectAge(false));
+
+      // Limpieza en tiempo real de DNI / Pasaporte y actualización de cláusula dinámica
+      const nombreSolInput = document.getElementById('nombreSolicitante');
+      const dniSolInput = document.getElementById('dniSolicitante');
+      const nombreTutInput = document.getElementById('nombreTutor');
+      const dniTutInput = document.getElementById('dniTutor');
+
+      function bindCleanDniInput(input, errId) {
+        input.addEventListener('input', () => {
+          const cleaned = cleanDocumentId(input.value);
+          if (input.value !== cleaned) {
+            input.value = cleaned;
+          }
+          document.getElementById(errId).classList.add('hidden');
+          input.classList.remove('border-rose-400');
+          updateDynamicMinorClause();
+        });
+      }
+
+      bindCleanDniInput(dniSolInput, 'errDniSolicitante');
+      bindCleanDniInput(dniTutInput, 'errDniTutor');
+
+      nombreSolInput.addEventListener('input', () => {
+        document.getElementById('errNombreSolicitante').classList.add('hidden');
+        nombreSolInput.classList.remove('border-rose-400');
+        updateDynamicMinorClause();
+      });
+
+      nombreTutInput.addEventListener('input', () => {
+        document.getElementById('errNombreTutor').classList.add('hidden');
+        nombreTutInput.classList.remove('border-rose-400');
+        updateDynamicMinorClause();
+      });
+
+      // Botones de borrar firma
+      document.getElementById('clearSigSolicitante').addEventListener('click', () => sigSolicitante.clear());
+      document.getElementById('clearSigTutor').addEventListener('click', () => sigTutor.clear());
+
+      // =======================================================================
+      // VALIDACIÓN Y ENVÍO DEL FORMULARIO (PASO 4)
+      // =======================================================================
+      const form = document.getElementById('authorizationForm');
+      const submitBtn = document.getElementById('submitBtn');
+      const submitIcon = document.getElementById('submitIcon');
+      const submitSpinner = document.getElementById('submitSpinner');
+      const submitBtnText = document.getElementById('submitBtnText');
+      const globalErrorBox = document.getElementById('globalErrorBox');
+      const globalErrorMessage = document.getElementById('globalErrorMessage');
+
+      function setGlobalError(msg) {
+        if (!msg) {
+          globalErrorBox.classList.add('hidden');
+          globalErrorMessage.textContent = '';
+          return;
+        }
+        globalErrorMessage.textContent = msg;
+        globalErrorBox.classList.remove('hidden');
+      }
+
+      function setLoading(loading) {
+        state.isSubmitting = loading;
+        submitBtn.disabled = loading;
+        submitIcon.classList.toggle('hidden', loading);
+        submitSpinner.classList.toggle('hidden', !loading);
+        submitBtnText.textContent = loading
+          ? 'Generando PDF y enviando... / 正在產生 PDF 並傳送中...'
+          : 'Confirmar y Enviar Firma / 確認並送出簽名';
+      }
+
+      function validateForm() {
+        let firstInvalidEl = null;
+        const markInvalid = (el) => {
+          if (!firstInvalidEl) firstInvalidEl = el;
+        };
+
+        // 1. Aceptación de 13 normas
+        if (!acceptRulesCheckbox.checked) {
+          document.getElementById('errAcceptRules').classList.remove('hidden');
+          acceptRulesContainer.classList.add('border-rose-400', 'bg-rose-50/40');
+          markInvalid(document.getElementById('step1Card'));
+        }
+
+        // 2. Selección de edad
+        if (state.esMayor === null) {
+          document.getElementById('errAgeChoice').classList.remove('hidden');
+          markInvalid(document.getElementById('step2Card'));
+        }
+
+        // 3. Solicitante
+        const nombreSolicitante = nombreSolInput.value.trim();
+        const dniSolicitante = cleanDocumentId(dniSolInput.value);
+
+        if (nombreSolicitante.length < 2) {
+          document.getElementById('errNombreSolicitante').classList.remove('hidden');
+          nombreSolInput.classList.add('border-rose-400');
+          markInvalid(nombreSolInput);
+        }
+
+        if (dniSolicitante.length < 5) {
+          document.getElementById('errDniSolicitante').classList.remove('hidden');
+          dniSolInput.classList.add('border-rose-400');
+          markInvalid(dniSolInput);
+        }
+
+        if (sigSolicitante.isEmpty()) {
+          document.getElementById('errSigSolicitante').classList.remove('hidden');
+          document.getElementById('sigSolicitanteBox').classList.add('border-rose-400', 'bg-rose-50/30');
+          markInvalid(document.getElementById('sigSolicitanteBox'));
+        }
+
+        // 4. Tutor (solo si es menor de 18 años)
+        let nombreTutor = '';
+        let dniTutor = '';
+
+        if (state.esMayor === false) {
+          nombreTutor = nombreTutInput.value.trim();
+          dniTutor = cleanDocumentId(dniTutInput.value);
+
+          if (nombreTutor.length < 2) {
+            document.getElementById('errNombreTutor').classList.remove('hidden');
+            nombreTutInput.classList.add('border-rose-400');
+            markInvalid(nombreTutInput);
+          }
+
+          if (dniTutor.length < 5) {
+            document.getElementById('errDniTutor').classList.remove('hidden');
+            dniTutInput.classList.add('border-rose-400');
+            markInvalid(dniTutInput);
+          }
+
+          if (sigTutor.isEmpty()) {
+            document.getElementById('errSigTutor').classList.remove('hidden');
+            document.getElementById('sigTutorBox').classList.add('border-rose-400', 'bg-rose-50/30');
+            markInvalid(document.getElementById('sigTutorBox'));
+          }
+        }
+
+        if (firstInvalidEl) {
+          firstInvalidEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          setGlobalError('Por favor revisá los campos obligatorios y las firmas pendientes antes de enviar. / 請先填妥所有必填欄位並完成簽名。');
+          return null;
+        }
+
+        setGlobalError('');
+        return {
+          nombreSolicitante,
+          dniSolicitante,
+          esMayor: state.esMayor,
+          nombreTutor,
+          dniTutor
+        };
+      }
+
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        if (state.isSubmitting) return;
+
+        const data = validateForm();
+        if (!data) return;
+
+        setLoading(true);
+        setGlobalError('');
+
+        try {
+          const sigSolPng = sigSolicitante.toTrimmedPNG();
+          const sigTutPng = data.esMayor ? null : sigTutor.toTrimmedPNG();
+
+          const fileName = `Autorizacion_${sanitizeFileNameSegment(data.nombreSolicitante)}_${data.dniSolicitante}.pdf`;
+
+          const { pdfBase64, pdfBlob } = await generateAuthorizationPDF({
+            ...data,
+            sigSolicitante: sigSolPng,
+            sigTutor: sigTutPng
+          });
+
+          state.generatedPdfBlob = pdfBlob;
+          state.generatedFileName = fileName;
+
+          const requestBody = {
+            nombreSolicitante: data.nombreSolicitante,
+            dniSolicitante: data.dniSolicitante,
+            esMayor: data.esMayor,
+            nombreTutor: data.nombreTutor,
+            dniTutor: data.dniTutor,
+            pdfBase64,
+            fileName
+          };
+
+          const isConfigured =
+            APPS_SCRIPT_URL &&
+            APPS_SCRIPT_URL.startsWith('https://script.google.com/');
+
+          if (isConfigured) {
+            // Se usa text/plain para evitar preflight CORS (OPTIONS) que Google Apps Script no soporta
+            const response = await fetch(APPS_SCRIPT_URL, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'text/plain;charset=utf-8'
+              },
+              body: JSON.stringify(requestBody),
+              redirect: 'follow'
+            });
+
+            if (!response.ok) {
+              throw new Error(`Error del servidor (${response.status})`);
+            }
+
+            let result = null;
+            try {
+              result = await response.json();
+            } catch (_) {
+              // Algunas respuestas redirigidas pueden no parsear si GAS devolvió texto plano
+            }
+
+            if (result && result.ok === false) {
+              throw new Error(result.error || 'No se pudo procesar la firma en el servidor.');
+            }
+            document.getElementById('demoModeNotice').classList.add('hidden');
+          } else {
+            // Si aún no se pegó APPS_SCRIPT_URL, permite probar la generación y descarga de PDF localmente
+            document.getElementById('demoModeNotice').classList.remove('hidden');
+          }
+
+          // Mostrar pantalla de éxito
+          document.getElementById('sumNombre').textContent = data.nombreSolicitante;
+          document.getElementById('sumDni').textContent = data.dniSolicitante;
+          document.getElementById('sumEdad').textContent = data.esMayor
+            ? 'Mayor de 18 años / 已滿 18 歲'
+            : 'Menor de 18 años / 未滿 18 歲';
+          document.getElementById('sumFileName').textContent = fileName;
+
+          const sumTutorRow = document.getElementById('sumTutorRow');
+          if (!data.esMayor) {
+            document.getElementById('sumTutor').textContent = `${data.nombreTutor} (${data.dniTutor})`;
+            sumTutorRow.classList.remove('hidden');
+          } else {
+            sumTutorRow.classList.add('hidden');
+          }
+
+          form.classList.add('hidden');
+          document.getElementById('introBanner').classList.add('hidden');
+          document.getElementById('successScreen').classList.remove('hidden');
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        } catch (err) {
+          console.error('Error al generar o enviar la firma:', err);
+          setGlobalError(
+            `Ocurrió un problema al enviar tu autorización (${err.message || 'Error de conexión'}). Verificá tu conexión a internet e intentá nuevamente. / 傳送時發生錯誤，請檢查網路連線後重試。`
+          );
+        } finally {
+          setLoading(false);
+        }
+      });
+
+      // Descargar copia opcional en PDF
+      document.getElementById('downloadCopyBtn').addEventListener('click', () => {
+        if (!state.generatedPdfBlob) return;
+        const url = URL.createObjectURL(state.generatedPdfBlob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = state.generatedFileName || 'Autorizacion_OVERCOMERS_2027.pdf';
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        setTimeout(() => URL.revokeObjectURL(url), 4000);
+      });
+
+      // Reiniciar formulario para otra persona
+      document.getElementById('resetFormBtn').addEventListener('click', () => {
+        form.reset();
+        state.esMayor = null;
+        state.generatedPdfBlob = null;
+        state.generatedFileName = '';
+
+        sigSolicitante.clear();
+        sigTutor.clear();
+
+        acceptRulesContainer.classList.remove('border-emerald-500', 'bg-emerald-50/60', 'border-rose-400', 'bg-rose-50/40');
+        acceptRulesContainer.classList.add('border-slate-200');
+
+        [btnMayor, btnMenor].forEach((btn) => {
+          btn.classList.remove('border-brand-700', 'bg-brand-50/70', 'ring-2', 'ring-brand-600/20');
+          btn.classList.add('border-slate-200', 'bg-white');
+          const dot = btn.querySelector('.age-radio-dot');
+          dot.classList.remove('bg-brand-700', 'border-brand-700');
+          dot.classList.add('border-slate-300');
+          dot.querySelector('svg').classList.add('hidden');
+        });
+
+        blockBCard.classList.add('hidden');
+        updateDynamicMinorClause();
+        setGlobalError('');
+
+        document.getElementById('successScreen').classList.add('hidden');
+        document.getElementById('introBanner').classList.remove('hidden');
+        form.classList.remove('hidden');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      });
+    });
   </script>
 </body>
 </html>
