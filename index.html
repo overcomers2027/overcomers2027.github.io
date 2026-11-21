@@ -223,22 +223,8 @@
 
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
-            <label for="apellidoSolicitante" class="block text-sm font-semibold text-slate-700 mb-1.5">
-              Apellido <span class="text-slate-400 font-normal">/ 姓</span>
-            </label>
-            <input
-              type="text"
-              id="apellidoSolicitante"
-              name="apellidoSolicitante"
-              autocomplete="family-name"
-              placeholder="Ej: Pérez"
-              class="w-full rounded-xl border-2 border-slate-300 bg-white px-3.5 py-3 text-slate-900 placeholder:text-slate-400 focus:border-brand-600 outline-none transition-all"
-            />
-          </div>
-
-          <div>
-            <label for="nombrePilaSolicitante" class="block text-sm font-semibold text-slate-700 mb-1.5">
-              Nombre <span class="text-slate-400 font-normal">/ 名</span>
+            <label for="nombrePilaSolicitante" class="block text-base font-bold text-slate-800 mb-1.5">
+              Nombre <span class="text-sm text-slate-400 font-normal">/ 名</span>
             </label>
             <input
               type="text"
@@ -250,8 +236,28 @@
             />
           </div>
 
+          <div>
+            <label for="apellidoSolicitante" class="block text-base font-bold text-slate-800 mb-1.5">
+              Apellido <span class="text-sm text-slate-400 font-normal">/ 姓</span>
+            </label>
+            <input
+              type="text"
+              id="apellidoSolicitante"
+              name="apellidoSolicitante"
+              autocomplete="family-name"
+              placeholder="Ej: Pérez"
+              class="w-full rounded-xl border-2 border-slate-300 bg-white px-3.5 py-3 text-slate-900 placeholder:text-slate-400 focus:border-brand-600 outline-none transition-all"
+            />
+          </div>
+
+          <!-- Vista previa en vivo: así se nota enseguida si invirtieron nombre y apellido -->
+          <p id="nombreCompletoPreview" class="hidden sm:col-span-2 -mt-1 text-sm text-slate-700 bg-emerald-50 border border-emerald-200 rounded-lg px-3 py-2">
+            Así va a figurar tu nombre: <strong id="nombreCompletoTexto" class="text-slate-900"></strong>
+            <span class="block text-xs text-slate-500 mt-0.5">Si está al revés, corregilo arriba · 若顛倒請在上方修改</span>
+          </p>
+
           <p id="errNombreSolicitante" class="hidden sm:col-span-2 -mt-2 text-sm font-medium text-rose-600">
-            Escribí tu apellido y tu nombre. / 請輸入姓和名。
+            Escribí tu nombre y tu apellido. / 請輸入名和姓。
           </p>
 
           <div class="sm:col-span-2">
@@ -547,10 +553,10 @@
     // =========================================================================
     const GOOGLE_FORM_URL = 'https://docs.google.com/forms/d/e/1FAIpQLSeGWv0rR3pyMZ4CcCbK_t-kLLzDvh3JlNqrk1HTgmxjrlNZnw/viewform';
     const GOOGLE_FORM_ENTRIES = {
-      yaFirme: '',      // Sección 1: "¿Ya firmaste...?" (obligatoria)
-      apellido: '',     // "Apellido / 姓"
-      nombre: '',       // "Nombre / 名"
-      dni: ''           // "N° de DNI / 身分證號碼"
+      yaFirme: '171166391',   // Sección 1: "¿Ya firmaste...?" (obligatoria)
+      apellido: '473062124',  // "Apellido / 姓"
+      nombre: '336224135',    // "Nombre / 名"
+      dni: '1293302769'       // "N° de DNI / 身分證號碼"
     };
     // Texto exacto de la opción de la pregunta "¿Ya firmaste...?" en el Form
     const GOOGLE_FORM_OPCION_YA_FIRME = 'Sí, ya firmé / 是，已簽名';
@@ -899,6 +905,13 @@
 
     function updateDynamicMinorClause() {
       const minorName = getNombreCompletoSolicitante();
+
+      // Vista previa del nombre completo (Paso 3)
+      const preview = document.getElementById('nombreCompletoPreview');
+      const nombreOk = document.getElementById('nombrePilaSolicitante').value.trim();
+      const apellidoOk = document.getElementById('apellidoSolicitante').value.trim();
+      document.getElementById('nombreCompletoTexto').textContent = minorName;
+      preview.classList.toggle('hidden', !(nombreOk && apellidoOk));
       const minorDni = cleanDocumentId(document.getElementById('dniSolicitante').value);
       const tutorName = document.getElementById('nombreTutor').value.trim();
       const tutorDni = cleanDocumentId(document.getElementById('dniTutor').value);
