@@ -74,6 +74,11 @@ const OVERCOMERS_CONFIG = {
   // o indicar un número de columna fijo (1 = A, 2 = B, etc.) si se desea forzar una columna específica.
   DNI_COL_INDEX: 5, // Columna E = DNI del inscripto (igual que en EmitirRecibo.gs)
 
+  // Columnas del nombre en "Respuestas de formulario" (C = "Apellido / 姓", D = "Nombre / 名").
+  // Se usan para unir firma e inscripción por nombre cuando el DNI no coincide.
+  APELLIDO_COL_INDEX: 3,
+  NOMBRE_COL_INDEX: 4,
+
   // Columna AY = columna 51 ("¿serás mayor de edad?"). Si la pregunta se saca del Form,
   // se completa sola con lo que la persona eligió al firmar (solo si la celda está vacía).
   MAYOR_COL_INDEX: 51,
@@ -165,8 +170,14 @@ function ovcProcesarFirma(e) {
     const dniColIndex = ovcFindDniColumnIndex(mainSheet);
 
     let matchedRow = -1;
+    let porNombre = false;
     if (dniColIndex > 0) {
       matchedRow = ovcFindRowByDni(mainSheet, dniColIndex, dniLimpio);
+    }
+    if (matchedRow <= 0) {
+      // Respaldo: el DNI no coincide (mal tipeado) -> buscar por nombre y apellido
+      matchedRow = ovcFindRowByName(mainSheet, ovcNameKey(nombreSolicitante));
+      porNombre = matchedRow > 0;
     }
 
     if (matchedRow > 0) {
@@ -177,9 +188,16 @@ function ovcProcesarFirma(e) {
       // Si existía algún registro previo en Firmas_Pendientes para este DNI, marcarlo como Vinculado
       ovcMarkPendingAsLinkedIfExists(ss, dniLimpio);
 
+      // Si se unió por nombre (DNI distinto), dejarlo anotado para que la Coordinación lo revise
+      if (porNombre) {
+        ovcGetOrCreatePendingSheet(ss).appendRow([
+          new Date(), nombreSolicitante, dniLimpio, driveUrl, 'Vinculado (por nombre)', mayorTexto
+        ]);
+      }
+
       return ovcBuildJsonResponse({
         ok: true,
-        status: 'linked',
+        status: porNombre ? 'linked_by_name' : 'linked',
         matchedRow: matchedRow,
         fileName: finalFileName,
         driveUrl: driveUrl
@@ -238,31 +256,40 @@ function onFormSubmitOvercomers(e) {
     if (!targetSheet || newRow < 2) return;
 
     const dniColIndex = ovcFindDniColumnIndex(targetSheet);
-    if (dniColIndex <= 0) return;
+    const submittedDni = dniColIndex > 0
+      ? ovcNormalizeDni(targetSheet.getRange(newRow, dniColIndex).getValue())
+      : '';
+    const submittedNameKey = ovcNameKey(
+      targetSheet.getRange(newRow, OVERCOMERS_CONFIG.NOMBRE_COL_INDEX).getValue() + ' ' +
+      targetSheet.getRange(newRow, OVERCOMERS_CONFIG.APELLIDO_COL_INDEX).getValue()
+    );
+    if (!submittedDni && !submittedNameKey) return;
 
-    const submittedDniRaw = targetSheet.getRange(newRow, dniColIndex).getValue();
-    const submittedDni = ovcNormalizeDni(submittedDniRaw);
-    if (!submittedDni) return;
-
-    // Buscar en Firmas_Pendientes (de abajo hacia arriba para tomar la firma más reciente)
+    // Firmas_Pendientes -> [0] Fecha, [1] Nombre, [2] DNI, [3] URL_Drive, [4] Estado, [5] Mayor de edad
     const pendingLastRow = pendingSheet.getLastRow();
     const pendingValues = pendingSheet.getRange(2, 1, pendingLastRow - 1, 6).getValues();
-    // Columnas: [0] Fecha, [1] Nombre, [2] DNI, [3] URL_Drive, [4] Estado, [5] Mayor de edad
 
-    for (let i = pendingValues.length - 1; i >= 0; i--) {
-      const pendingDni = ovcNormalizeDni(pendingValues[i][2]);
-      const driveUrl = String(pendingValues[i][3] || '').trim();
-      const estado = String(pendingValues[i][4] || '').trim();
+    // 1) Por DNI; 2) si no hay, por nombre y apellido. Siempre la firma más reciente.
+    let idx = ovcBuscarPendiente(pendingValues, (row) => submittedDni && ovcNormalizeDni(row[2]) === submittedDni);
+    let porNombre = false;
+    if (idx < 0 && ovcNameKeyUsable(submittedNameKey)) {
+      idx = ovcBuscarPendiente(pendingValues, (row) => ovcNameKey(row[1]) === submittedNameKey);
+      porNombre = idx >= 0;
+    }
+    if (idx < 0) return;
 
-      if (pendingDni === submittedDni && driveUrl && estado !== 'Vinculado') {
-        // Pegar el enlace de Google Drive en la columna AZ (52) de la nueva fila
-        targetSheet.getRange(newRow, OVERCOMERS_CONFIG.TARGET_COL_INDEX).setValue(driveUrl);
-        ovcFillMayorIfEmpty(targetSheet, newRow, pendingValues[i][5]);
+    // Pegar el enlace de Google Drive en la columna AZ (52) de la nueva fila
+    targetSheet.getRange(newRow, OVERCOMERS_CONFIG.TARGET_COL_INDEX).setValue(String(pendingValues[idx][3]).trim());
+    ovcFillMayorIfEmpty(targetSheet, newRow, pendingValues[idx][5]);
 
-        // Marcar el registro en Firmas_Pendientes como "Vinculado"
-        const pendingRowIndex = i + 2;
-        pendingSheet.getRange(pendingRowIndex, 5).setValue('Vinculado');
-        break;
+    // Marcar la firma usada y dejar como "Reemplazada" las firmas viejas de la misma persona
+    pendingSheet.getRange(idx + 2, 5).setValue(porNombre ? 'Vinculado (por nombre)' : 'Vinculado');
+    const mismaPersona = (row) =>
+      (submittedDni && ovcNormalizeDni(row[2]) === submittedDni) ||
+      (porNombre && ovcNameKey(row[1]) === submittedNameKey);
+    for (let i = 0; i < pendingValues.length; i++) {
+      if (i !== idx && ovcPendienteDisponible(pendingValues[i]) && mismaPersona(pendingValues[i])) {
+        pendingSheet.getRange(i + 2, 5).setValue('Reemplazada');
       }
     }
   } finally {
@@ -291,21 +318,36 @@ function sincronizarPendientesManualmente() {
   const pendingLastRow = pendingSheet.getLastRow();
   const pendingValues = pendingSheet.getRange(2, 1, pendingLastRow - 1, 6).getValues();
   let vinculados = 0;
+  const filasVinculadas = [];
 
-  for (let i = 0; i < pendingValues.length; i++) {
-    const pendingDni = ovcNormalizeDni(pendingValues[i][2]);
+  // De la más reciente a la más vieja: si una persona firmó dos veces, se usa la última
+  for (let i = pendingValues.length - 1; i >= 0; i--) {
     const driveUrl = String(pendingValues[i][3] || '').trim();
-    const estado = String(pendingValues[i][4] || '').trim();
+    if (!driveUrl || !ovcPendienteDisponible(pendingValues[i])) continue;
 
-    if (!pendingDni || !driveUrl || estado === 'Vinculado') continue;
-
-    const matchedRow = ovcFindRowByDni(mainSheet, dniColIndex, pendingDni);
+    const pendingDni = ovcNormalizeDni(pendingValues[i][2]);
+    let matchedRow = pendingDni ? ovcFindRowByDni(mainSheet, dniColIndex, pendingDni) : -1;
+    let porNombre = false;
+    if (matchedRow <= 0) {
+      matchedRow = ovcFindRowByName(mainSheet, ovcNameKey(pendingValues[i][1]));
+      porNombre = matchedRow > 0;
+    }
     if (matchedRow > 0) {
+      const yaTieneLink = String(mainSheet.getRange(matchedRow, OVERCOMERS_CONFIG.TARGET_COL_INDEX).getValue() || '').trim();
+      if (yaTieneLink && yaTieneLink !== driveUrl && vinculadoEnEstaPasada(matchedRow)) {
+        pendingSheet.getRange(i + 2, 5).setValue('Reemplazada');
+        continue;
+      }
       mainSheet.getRange(matchedRow, OVERCOMERS_CONFIG.TARGET_COL_INDEX).setValue(driveUrl);
       ovcFillMayorIfEmpty(mainSheet, matchedRow, pendingValues[i][5]);
-      pendingSheet.getRange(i + 2, 5).setValue('Vinculado');
+      pendingSheet.getRange(i + 2, 5).setValue(porNombre ? 'Vinculado (por nombre)' : 'Vinculado');
+      filasVinculadas.push(matchedRow);
       vinculados++;
     }
+  }
+
+  function vinculadoEnEstaPasada(row) {
+    return filasVinculadas.indexOf(row) !== -1;
   }
 
   Logger.log('Sincronización completada. Firmas vinculadas: ' + vinculados);
@@ -314,6 +356,61 @@ function sincronizarPendientesManualmente() {
 /* ============================================================================
  * FUNCIONES AUXILIARES INTERNAS
  * ============================================================================ */
+
+/**
+ * Clave para comparar nombres sin importar orden, mayúsculas, tildes ni signos:
+ * "Facundo Ho", "HO, facundo" y "Ho Facúndo" -> "FACUNDO HO".
+ */
+function ovcNameKey(text) {
+  return String(text || '')
+    .normalize('NFD')
+    .replace(/[̀-ͯ]/g, '')
+    .toUpperCase()
+    .replace(/[^A-Z0-9一-鿿\s]/g, ' ')
+    .split(/\s+/)
+    .filter(Boolean)
+    .sort()
+    .join(' ');
+}
+
+/** Solo se une por nombre si hay al menos nombre y apellido (2 palabras). */
+function ovcNameKeyUsable(key) {
+  return Boolean(key) && key.split(' ').length >= 2;
+}
+
+/** Una firma pendiente se puede usar si todavía no fue vinculada ni reemplazada. */
+function ovcPendienteDisponible(row) {
+  const estado = String(row[4] || '').trim();
+  return Boolean(String(row[3] || '').trim()) && (estado === '' || estado === 'Pendiente');
+}
+
+/** Índice de la firma pendiente más reciente que cumple la condición, o -1. */
+function ovcBuscarPendiente(pendingValues, condicion) {
+  for (let i = pendingValues.length - 1; i >= 0; i--) {
+    if (ovcPendienteDisponible(pendingValues[i]) && condicion(pendingValues[i])) return i;
+  }
+  return -1;
+}
+
+/**
+ * Busca la inscripción más reciente cuyo "Nombre" + "Apellido" coincida con la clave.
+ * Respaldo para cuando el DNI se tipeó mal. Devuelve la fila (1-based) o -1.
+ */
+function ovcFindRowByName(sheet, nameKey) {
+  if (!ovcNameKeyUsable(nameKey)) return -1;
+  const lastRow = sheet.getLastRow();
+  if (lastRow < 2) return -1;
+  const colAp = OVERCOMERS_CONFIG.APELLIDO_COL_INDEX;
+  const colNo = OVERCOMERS_CONFIG.NOMBRE_COL_INDEX;
+  const first = Math.min(colAp, colNo);
+  const width = Math.abs(colAp - colNo) + 1;
+  const values = sheet.getRange(2, first, lastRow - 1, width).getValues();
+  for (let i = values.length - 1; i >= 0; i--) {
+    const key = ovcNameKey(values[i][colNo - first] + ' ' + values[i][colAp - first]);
+    if (key === nameKey) return i + 2;
+  }
+  return -1;
+}
 
 /** true -> "Si / 是", false -> "No / 否", cualquier otra cosa -> "" (igual que las opciones del Form) */
 function ovcMayorTexto(esMayor) {
