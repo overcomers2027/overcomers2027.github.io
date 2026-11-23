@@ -140,7 +140,12 @@
         return recibo && recibo.nro && sobre.h ? { p: sobre.p, h: sobre.h, recibo } : null;
       } catch (_) { return null; }
     }
-    const LINK = leerLink();
+    // Modo demostración (pago.html#demo): recibo de ejemplo, no guarda ni envía nada
+    const DEMO = location.hash === '#demo';
+    const LINK = DEMO
+      ? { p: '', h: '', recibo: { nro: 'CV27-0000', fecha: new Date().toLocaleDateString('es-AR'), apellido: 'Pérez', nombre: 'Juan',
+          dni: '40123456', total: '$ 450.000', recibio: 'Facundo Ho', codigoFirma: 'FH', items: [['Inscripción completa PRECIO PROMO1', '1', '$ 450.000']] } }
+      : leerLink();
     const R = LINK ? LINK.recibo : null;
     let firmaTesoreroPng = null; // la trae el sistema (imagen "firma XX.png" del recibo)
     let pdfGenerado = null;
@@ -275,6 +280,12 @@
       mensaje('info', 'Generando la constancia y enviándola. Puede tardar unos segundos.');
       try {
         pdfGenerado = await generarPdf(firmante);
+        if (DEMO) { // no se envía nada: solo se muestra el resultado y se puede descargar el PDF
+          $('formFirma').classList.add('hidden'); $('exito').classList.remove('hidden');
+          $('exito').querySelector('p').textContent = 'MODO DEMOSTRACIÓN: no se envió nada. Podés descargar el PDF de ejemplo para ver cómo queda:';
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+          return;
+        }
         const pdfBase64 = pdfGenerado.output('datauristring').split(',')[1];
         const res = await fetch(URL_SISTEMA, {
           method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' },
@@ -313,8 +324,14 @@
       $('btnEnviar').addEventListener('click', enviar);
       $('btnDescargar').addEventListener('click', () => pdfGenerado && pdfGenerado.save(`Constancia_pago_${R.nro}.pdf`));
 
+      if (DEMO) {
+        $('contenido').insertAdjacentHTML('afterbegin',
+          '<div class="msg info" style="display:block">MODO DEMOSTRACIÓN — recibo de ejemplo. No se guarda ni se envía nada. ' +
+          '(En los recibos reales también aparece la firma del tesorero en el PDF.)</div>');
+      }
+
       // Pedir la firma del tesorero (y verificar que el link sea válido)
-      fetch(URL_SISTEMA, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ origen: 'pago', accion: 'firmaTesorero', p: LINK.p, h: LINK.h }) })
+      if (!DEMO) fetch(URL_SISTEMA, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ origen: 'pago', accion: 'firmaTesorero', p: LINK.p, h: LINK.h }) })
         .then((r) => r.json())
         .then((d) => {
           if (d.ok) { firmaTesoreroPng = d.png || null; return; }
