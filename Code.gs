@@ -136,9 +136,6 @@ function doPost(e) {
 function ovcProcesarFirma(e) {
   const lock = LockService.getScriptLock();
   try {
-    // Evita conflictos si varios acampantes envían su firma al mismo tiempo
-    lock.waitLock(30000);
-
     if (!e || !e.postData || !e.postData.contents) {
       return ovcBuildJsonResponse({ ok: false, error: 'No se recibieron datos en la solicitud.' });
     }
@@ -173,6 +170,10 @@ function ovcProcesarFirma(e) {
     // Configurar permisos de lectura mediante enlace
     file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
     const driveUrl = 'https://drive.google.com/open?id=' + file.getId();
+
+    // A partir de acá se escribe en la planilla: de a una firma por vez para evitar conflictos
+    // (guardar el PDF en Drive, que es lo más lento, se hace antes y sin hacer esperar a nadie)
+    lock.waitLock(30000);
 
     // 4. Buscar la fila del inscripto en la hoja principal de respuestas
     const ss = SpreadsheetApp.getActiveSpreadsheet();
@@ -579,12 +580,26 @@ function ovcSanitizeFileNamePart(str) {
     .replace(/^_|_$/g, '') || 'Participante';
 }
 
+/**
+ * Devuelve la carpeta (y la crea si no existe). Recuerda su ID en las propiedades del
+ * proyecto para no buscarla por nombre en todo el Drive en cada firma (es lo más lento).
+ */
 function ovcGetOrCreateFolder(folderName) {
-  const folders = DriveApp.getFoldersByName(folderName);
-  if (folders.hasNext()) {
-    return folders.next();
+  const props = PropertiesService.getScriptProperties();
+  const clave = 'OVC_CARPETA_' + folderName;
+  const idGuardado = props.getProperty(clave);
+  if (idGuardado) {
+    try {
+      const carpeta = DriveApp.getFolderById(idGuardado);
+      if (!carpeta.isTrashed()) return carpeta;
+    } catch (_) {
+      // Sin acceso o borrada: se vuelve a buscar por nombre
+    }
   }
-  return DriveApp.createFolder(folderName);
+  const folders = DriveApp.getFoldersByName(folderName);
+  const carpeta = folders.hasNext() ? folders.next() : DriveApp.createFolder(folderName);
+  props.setProperty(clave, carpeta.getId());
+  return carpeta;
 }
 
 function ovcGetMainResponsesSheet(ss) {

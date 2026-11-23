@@ -853,15 +853,17 @@
         const sw = Math.min(w - sx, (maxX - minX) + pad * 2);
         const sh = Math.min(h - sy, (maxY - minY) + pad * 2);
 
+        // Achicar la firma a un máximo de 600 px de ancho (suficiente para el PDF y mucho más liviana)
+        const factor = Math.min(1, 600 / sw);
         const out = document.createElement('canvas');
-        out.width = sw;
-        out.height = sh;
-        out.getContext('2d').drawImage(this.canvas, sx, sy, sw, sh, 0, 0, sw, sh);
+        out.width = Math.max(1, Math.round(sw * factor));
+        out.height = Math.max(1, Math.round(sh * factor));
+        out.getContext('2d').drawImage(this.canvas, sx, sy, sw, sh, 0, 0, out.width, out.height);
 
         return {
           dataUrl: out.toDataURL('image/png'),
-          width: sw,
-          height: sh
+          width: out.width,
+          height: out.height
         };
       }
     }
@@ -1000,15 +1002,18 @@
     }
 
     function createA4Canvas() {
-      // 1654 x 2339 px ≈ 200 DPI en hoja A4 (210 x 297 mm)
+      // Se dibuja en coordenadas de 1654 x 2339 (A4 a 200 DPI), pero la imagen real es de
+      // 1240 x 1754 (150 DPI): se ve igual de nítida, pesa la mitad y se arma más rápido.
+      const W = 1654, H = 2339, ESCALA = 0.75;
       const canvas = document.createElement('canvas');
-      canvas.width = 1654;
-      canvas.height = 2339;
+      canvas.width = Math.round(W * ESCALA);
+      canvas.height = Math.round(H * ESCALA);
       const ctx = canvas.getContext('2d');
+      ctx.setTransform(ESCALA, 0, 0, ESCALA, 0, 0);
       ctx.fillStyle = '#ffffff';
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.fillRect(0, 0, W, H);
       ctx.textBaseline = 'top';
-      return { canvas, ctx, W: canvas.width, H: canvas.height };
+      return { canvas, ctx, W, H };
     }
 
     function drawDocumentHeader(ctx, W, pageNum, totalPages) {
@@ -1343,11 +1348,11 @@
       });
 
       // Página 1
-      pdf.addImage(p1.canvas.toDataURL('image/jpeg', 0.88), 'JPEG', 0, 0, 210, 297, undefined, 'FAST');
+      pdf.addImage(p1.canvas.toDataURL('image/jpeg', 0.8), 'JPEG', 0, 0, 210, 297, undefined, 'FAST');
 
       // Página 2
       pdf.addPage();
-      pdf.addImage(p2.canvas.toDataURL('image/jpeg', 0.88), 'JPEG', 0, 0, 210, 297, undefined, 'FAST');
+      pdf.addImage(p2.canvas.toDataURL('image/jpeg', 0.8), 'JPEG', 0, 0, 210, 297, undefined, 'FAST');
 
       // Incrustar firma PNG transparente del Solicitante directamente sobre la línea
       if (payload.sigSolicitante) {
@@ -1647,6 +1652,8 @@
 
           const fileName = `Autorizacion_${sanitizeFileNameSegment(data.nombreSolicitante)}_${data.dniSolicitante}.pdf`;
 
+          submitBtnText.textContent = 'Paso 1 de 2: armando el PDF... / 正在產生 PDF...';
+          await new Promise((r) => requestAnimationFrame(() => setTimeout(r, 0)));
           const { pdfBase64, pdfBlob } = await generateAuthorizationPDF({
             ...data,
             sigSolicitante: sigSolPng,
@@ -1672,6 +1679,7 @@
             APPS_SCRIPT_URL.startsWith('https://script.google.com/');
 
           if (isConfigured) {
+            submitBtnText.textContent = 'Paso 2 de 2: enviando y guardando... / 正在傳送...';
             // Se usa text/plain para evitar preflight CORS (OPTIONS) que Google Apps Script no soporta
             const response = await fetch(APPS_SCRIPT_URL, {
               method: 'POST',
