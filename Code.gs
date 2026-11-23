@@ -256,15 +256,22 @@ function onFormSubmitOvercomers(e) {
     lock.waitLock(30000);
 
     const ss = SpreadsheetApp.getActiveSpreadsheet();
-    const pendingSheet = ss.getSheetByName(OVERCOMERS_CONFIG.PENDING_SHEET_NAME);
-    if (!pendingSheet || pendingSheet.getLastRow() < 2) {
-      return; // No hay firmas pendientes por vincular
-    }
 
     // Determinar hoja y fila recién ingresada
     const targetSheet = (e && e.range) ? e.range.getSheet() : ovcGetMainResponsesSheet(ss);
     const newRow = (e && e.range) ? e.range.getRow() : targetSheet.getLastRow();
     if (!targetSheet || newRow < 2) return;
+
+    // (Agregado por Esteban) Generar el link "🧾 Emitir recibo" en la columna BC del nuevo inscripto.
+    // La función ovcGenerarLinkReciboFila está en EmitirRecibo.gs.
+    if (typeof ovcGenerarLinkReciboFila === 'function') {
+      ovcGenerarLinkReciboFila(targetSheet, newRow);
+    }
+
+    const pendingSheet = ss.getSheetByName(OVERCOMERS_CONFIG.PENDING_SHEET_NAME);
+    if (!pendingSheet || pendingSheet.getLastRow() < 2) {
+      return; // No hay firmas pendientes por vincular
+    }
 
     const dniColIndex = ovcFindDniColumnIndex(targetSheet);
     const submittedDni = dniColIndex > 0
