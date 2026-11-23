@@ -83,7 +83,12 @@ const OVERCOMERS_CONFIG = {
   // se completa sola con lo que la persona eligió al firmar (solo si la celda está vacía).
   MAYOR_COL_INDEX: 51,
   MAYOR_SI: 'Si / 是',
-  MAYOR_NO: 'No / 否'
+  MAYOR_NO: 'No / 否',
+
+  // Constancia de pago firmada (link que va en el mail de cada recibo)
+  PAGO_URL: 'https://overcomers2027.github.io/pago.html',
+  PAGOS_SHEET_NAME: 'Pagos_Firmados',
+  PAGOS_FOLDER_NAME: 'Firmas de pago OVERCOMERS 2027'
 };
 
 /**
@@ -99,6 +104,11 @@ function doPost(e) {
   try {
     datos = JSON.parse(e.postData.contents);
   } catch (_) {}
+
+  // Constancia de pago firmada (página pago.html)
+  if (datos && datos.origen === 'pago') {
+    return ovcProcesarPago(datos);
+  }
 
   const esFirmaOvercomers =
     datos && (datos.origen === 'overcomers' || (datos.pdfBase64 && datos.dniSolicitante));
@@ -351,6 +361,128 @@ function sincronizarPendientesManualmente() {
   }
 
   Logger.log('Sincronización completada. Firmas vinculadas: ' + vinculados);
+}
+
+/* ============================================================================
+ * CONSTANCIA DE PAGO FIRMADA
+ * ----------------------------------------------------------------------------
+ * 1) EmitirRecibo.gs llama a ovcLinkFirmaPago({...}) al mandar el mail del recibo.
+ *    El link lleva los datos del recibo + un sello (HMAC) para que no se puedan cambiar.
+ * 2) La persona firma en pago.html, que manda acá { origen: 'pago', accion, p, h, ... }.
+ * 3) Se verifica el sello, se guarda el PDF en Drive y se anota en "Pagos_Firmados".
+ * ============================================================================ */
+
+/**
+ * Arma el link personal para firmar la constancia de un recibo.
+ * Uso desde EmitirRecibo.gs:
+ *   ovcLinkFirmaPago({ nro, fecha, apellido, nombre, dni, total, recibio, codigoFirma, items, fila })
+ *   (items = [[descripcion, cantidad, importe], ...])
+ */
+function ovcLinkFirmaPago(datosRecibo) {
+  const p = JSON.stringify(datosRecibo);
+  const sobre = JSON.stringify({ p: p, h: ovcSelloPago(p) });
+  return OVERCOMERS_CONFIG.PAGO_URL + '#d=' + Utilities.base64EncodeWebSafe(sobre, Utilities.Charset.UTF_8);
+}
+
+/** Sello HMAC con una clave secreta guardada en las propiedades del proyecto (se crea sola). */
+function ovcSelloPago(texto) {
+  const props = PropertiesService.getScriptProperties();
+  let secreto = props.getProperty('OVC_PAGO_SECRETO');
+  if (!secreto) {
+    secreto = Utilities.getUuid() + Utilities.getUuid();
+    props.setProperty('OVC_PAGO_SECRETO', secreto);
+  }
+  return Utilities.base64EncodeWebSafe(
+    Utilities.computeHmacSha256Signature(texto, secreto, Utilities.Charset.UTF_8)
+  );
+}
+
+/** Devuelve los datos del recibo si el sello es correcto; si no, lanza un error. */
+function ovcVerificarDatosPago(p, h) {
+  const secreto = PropertiesService.getScriptProperties().getProperty('OVC_PAGO_SECRETO');
+  if (!secreto || !p || !h) throw new Error('Este link no es válido. Abrilo desde el mail del recibo.');
+  const esperado = Utilities.base64EncodeWebSafe(
+    Utilities.computeHmacSha256Signature(String(p), secreto, Utilities.Charset.UTF_8)
+  );
+  if (esperado !== String(h)) throw new Error('Este link fue modificado o no es válido. Abrilo desde el mail del recibo.');
+  return JSON.parse(p);
+}
+
+function ovcProcesarPago(datos) {
+  try {
+    const recibo = ovcVerificarDatosPago(datos.p, datos.h);
+
+    // La página pide la firma del tesorero (imagen "firma XX.png" del sistema de recibos)
+    if (datos.accion === 'firmaTesorero') {
+      return ovcBuildJsonResponse({ ok: true, png: ovcLeerFirmaTesorero(recibo.codigoFirma) });
+    }
+
+    if (datos.accion !== 'guardar') {
+      return ovcBuildJsonResponse({ ok: false, error: 'Acción no reconocida.' });
+    }
+
+    const firmante = datos.firmante || {};
+    const nombreFirmante = String(firmante.nombre || '').trim();
+    const dniFirmante = ovcNormalizeDni(firmante.dni);
+    const rol = firmante.rol === 'tutor' ? 'Padre, madre o tutor' : 'Acampante';
+    const pdfBase64 = String(datos.pdfBase64 || '').replace(/^data:application\/pdf;base64,/, '');
+    if (!nombreFirmante || !dniFirmante || !pdfBase64) {
+      return ovcBuildJsonResponse({ ok: false, error: 'Faltan datos de quien firma o la firma.' });
+    }
+
+    const lock = LockService.getScriptLock();
+    lock.waitLock(30000);
+    try {
+      const nombreArchivo = 'Pago_' + recibo.nro + '_' +
+        ovcSanitizeFileNamePart((recibo.apellido || '') + ' ' + (recibo.nombre || '')) + '.pdf';
+      const blob = Utilities.newBlob(Utilities.base64Decode(pdfBase64), 'application/pdf', nombreArchivo);
+      const file = ovcGetOrCreateFolder(OVERCOMERS_CONFIG.PAGOS_FOLDER_NAME).createFile(blob);
+      file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
+      const url = 'https://drive.google.com/open?id=' + file.getId();
+
+      ovcGetOrCreatePagosSheet(SpreadsheetApp.getActiveSpreadsheet()).appendRow([
+        new Date(),
+        recibo.nro,
+        ((recibo.apellido || '') + ' ' + (recibo.nombre || '')).trim(),
+        recibo.dni || '',
+        recibo.total || '',
+        recibo.recibio || '',
+        nombreFirmante,
+        dniFirmante,
+        rol,
+        url
+      ]);
+
+      return ovcBuildJsonResponse({ ok: true, url: url, fileName: nombreArchivo });
+    } finally {
+      try { lock.releaseLock(); } catch (_) {}
+    }
+  } catch (err) {
+    return ovcBuildJsonResponse({ ok: false, error: err && err.message ? err.message : String(err) });
+  }
+}
+
+/** Imagen de la firma del tesorero en base64, o null si no se encuentra o no hay acceso. */
+function ovcLeerFirmaTesorero(codigo) {
+  try {
+    if (typeof CONFIG_RECIBO === 'undefined' || !/^[A-Z]{1,4}$/.test(String(codigo || ''))) return null;
+    const archivos = DriveApp.getFolderById(CONFIG_RECIBO.ID_CARPETA_FIRMAS).getFilesByName('firma ' + codigo + '.png');
+    return archivos.hasNext() ? Utilities.base64Encode(archivos.next().getBlob().getBytes()) : null;
+  } catch (_) {
+    return null;
+  }
+}
+
+function ovcGetOrCreatePagosSheet(ss) {
+  let sheet = ss.getSheetByName(OVERCOMERS_CONFIG.PAGOS_SHEET_NAME);
+  if (!sheet) {
+    sheet = ss.insertSheet(OVERCOMERS_CONFIG.PAGOS_SHEET_NAME);
+    const headers = ['Fecha firma', 'N° recibo', 'Acampante', 'DNI acampante', 'Total', 'Recibió',
+      'Firmó', 'DNI de quien firmó', 'Firmó como', 'Constancia PDF'];
+    sheet.getRange(1, 1, 1, headers.length).setValues([headers]).setFontWeight('bold');
+    sheet.setFrozenRows(1);
+  }
+  return sheet;
 }
 
 /* ============================================================================

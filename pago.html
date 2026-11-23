@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Constancia de pago — OVERCOMERS 2027</title>
+  <!--
+    CONSTANCIA DE PAGO FIRMADA (OVERCOMERS 2027 - IPTA)
+    Se abre desde el link que llega en el mail del recibo. Los datos del recibo vienen en el "#"
+    del link, firmados por el sistema (no se pueden modificar: el servidor lo verifica).
+    Quien pagó (o su padre/madre/tutor si es menor) firma y se genera un PDF con su firma
+    y la del tesorero que recibió el pago.
+  -->
+  <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.2/dist/jspdf.umd.min.js"></script>
+  <style>
+    * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; -webkit-tap-highlight-color: transparent; }
+    body { margin: 0; background: #f1f5f9; color: #1f2937; font-size: 15px; }
+    header { background: #0b1b2e; color: #fff; text-align: center; padding: 14px 12px; }
+    header p { margin: 0; font-size: 11px; letter-spacing: .06em; color: #fcd34d; font-weight: 700; text-transform: uppercase; }
+    header h1 { margin: 2px 0 0; font-size: 20px; }
+    main { max-width: 560px; margin: 0 auto; padding: 16px 14px 60px; }
+    .card { background: #fff; border-radius: 14px; border: 1px solid #e2e8f0; padding: 16px; margin-bottom: 14px; }
+    h2 { font-size: 16px; margin: 0 0 10px; color: #0f172a; }
+    .sub { color: #64748b; font-size: 12.5px; margin: -6px 0 10px; }
+    .fila { display: flex; justify-content: space-between; gap: 10px; padding: 4px 0; font-size: 14px; }
+    .fila span:first-child { color: #64748b; }
+    table { width: 100%; border-collapse: collapse; margin-top: 8px; font-size: 13.5px; }
+    th, td { border-bottom: 1px solid #e2e8f0; padding: 6px 4px; text-align: left; }
+    th { color: #64748b; font-weight: 600; font-size: 12px; }
+    .total { font-size: 18px; font-weight: 800; color: #047857; text-align: right; margin-top: 8px; }
+    .declaracion { background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 10px; padding: 12px; font-size: 14px; line-height: 1.5; }
+    .declaracion .zh { color: #64748b; margin-top: 6px; }
+    label { display: block; font-weight: 700; font-size: 14px; margin: 12px 0 6px; }
+    input[type=text] { width: 100%; padding: 12px; border: 2px solid #cbd5e1; border-radius: 10px; font-size: 16px; }
+    .opciones { display: grid; gap: 8px; }
+    .opcion { display: flex; align-items: center; gap: 10px; padding: 12px; border: 2px solid #e2e8f0; border-radius: 10px; cursor: pointer; font-weight: 600; }
+    .opcion input { width: 20px; height: 20px; }
+    .firma-box { position: relative; border: 2px dashed #94a3b8; border-radius: 12px; background: #fff; overflow: hidden; }
+    .firma-box canvas { display: block; width: 100%; height: 200px; touch-action: none; }
+    .firma-placeholder { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; color: #94a3b8; pointer-events: none; font-weight: 600; }
+    .btn { width: 100%; padding: 16px; border: none; border-radius: 12px; background: #173457; color: #fff; font-size: 17px; font-weight: 800; cursor: pointer; }
+    .btn:disabled { opacity: .6; }
+    .btn-sec { background: #e2e8f0; color: #334155; padding: 9px 14px; width: auto; font-size: 13px; border-radius: 8px; border: none; font-weight: 700; margin-top: 8px; float: right; }
+    .msg { display: none; padding: 12px; border-radius: 10px; font-weight: 600; margin: 12px 0; font-size: 14px; }
+    .msg.error { display: block; background: #fee2e2; color: #991b1b; }
+    .msg.info { display: block; background: #e0f2fe; color: #075985; }
+    .msg.ok { display: block; background: #dcfce7; color: #166534; }
+    .hidden { display: none !important; }
+  </style>
+</head>
+<body>
+  <header>
+    <p>IPTA · Campamento de Verano 2027</p>
+    <h1>OVERCOMERS 「得勝者」</h1>
+  </header>
+
+  <main>
+    <div id="linkInvalido" class="msg error hidden">
+      Este link no es válido o está incompleto. Abrilo directamente desde el mail del recibo.
+    </div>
+
+    <div id="contenido" class="hidden">
+      <!-- Datos del recibo (no se pueden modificar) -->
+      <section class="card">
+        <h2>Comprobante digital - Campamento de Verano 2027 “OVERCOMERS”</h2>
+        <p class="sub">電子收據 - 2027 年夏令營「得勝者」</p>
+        <div class="fila"><span>RECIBO de pago — Número:</span><strong id="vNro"></strong></div>
+        <div class="fila"><span>Fecha:</span><strong id="vFecha"></strong></div>
+        <div class="fila"><span>Apellido y Nombre:</span><strong id="vNombre"></strong></div>
+        <div class="fila"><span>DNI:</span><strong id="vDni"></strong></div>
+        <table>
+          <thead><tr><th>Descripción</th><th>Cant.</th><th style="text-align:right">Importe</th></tr></thead>
+          <tbody id="vItems"></tbody>
+        </table>
+        <div class="total">TOTAL: <span id="vTotal"></span></div>
+        <div class="fila" style="margin-top:6px"><span>Recibió:</span><strong id="vRecibio"></strong></div>
+      </section>
+
+      <!-- Quién firma -->
+      <section class="card" id="formFirma">
+        <h2>Constancia de pago</h2>
+        <div class="opciones">
+          <label class="opcion"><input type="radio" name="rol" value="acampante" checked> Firmo yo, el/la acampante (mayor de 18)</label>
+          <label class="opcion"><input type="radio" name="rol" value="tutor"> Firma el padre, la madre o el tutor (acampante menor de 18)</label>
+        </div>
+
+        <label for="firmanteNombre">Nombre y apellido de quien firma</label>
+        <input type="text" id="firmanteNombre" autocomplete="name">
+        <label for="firmanteDni">DNI de quien firma</label>
+        <input type="text" id="firmanteDni" inputmode="text" autocomplete="off" placeholder="Sólo números (sin puntos)">
+
+        <div class="declaracion" style="margin-top:14px">
+          <div id="txtDeclaracionEs"></div>
+          <div id="txtDeclaracionZh" class="zh"></div>
+        </div>
+
+        <label>Firma</label>
+        <div class="firma-box">
+          <div class="firma-placeholder" id="firmaPlaceholder">Firmá acá con el dedo</div>
+          <canvas id="canvasFirma"></canvas>
+        </div>
+        <button type="button" class="btn-sec" id="btnBorrar">Borrar y firmar de nuevo</button>
+        <div style="clear:both"></div>
+
+        <div id="mensaje" class="msg"></div>
+        <button type="button" class="btn" id="btnEnviar" style="margin-top:14px">Firmar y enviar constancia</button>
+      </section>
+
+      <section class="card hidden" id="exito">
+        <h2>✅ ¡Constancia firmada!</h2>
+        <p>Tu constancia de pago firmada ya le llegó a la Coordinación. Podés descargar una copia:</p>
+        <button type="button" class="btn" id="btnDescargar">Descargar copia en PDF</button>
+      </section>
+    </div>
+  </main>
+
+  <script>
+    // ⚠️ BORRADOR — texto pendiente de aprobación del líder y traducción de la iglesia.
+    // Cuando esté aprobado, reemplazar estos textos (y completar el chino).
+    const TEXTO_CONSTANCIA = {
+      es: (r, rol) =>
+        `Declaro haber realizado el pago detallado en el comprobante N° ${r.nro}, por un total de ${r.total}, recibido por ${r.recibio}` +
+        (rol === 'tutor' ? `, correspondiente a la inscripción de ${r.nombre} ${r.apellido}.` : '.'),
+      zh: (r, rol) => ''
+    };
+
+    // Sistema de la Coordinación que guarda la constancia (el mismo de las firmas de normas)
+    const URL_SISTEMA = 'https://script.google.com/macros/s/AKfycbzwr7aEG4fO2ezSZ-XYHo86B31RexMV5tvjOblYL3AnYXOGK04ByG7exw2r_wVPjflLdw/exec';
+
+    // ---------- Datos del recibo que vienen en el link ----------
+    function leerLink() {
+      try {
+        const m = location.hash.match(/[#&]d=([A-Za-z0-9_\-=]+)/);
+        if (!m) return null;
+        let b64 = m[1].replace(/-/g, '+').replace(/_/g, '/');
+        while (b64.length % 4) b64 += '=';
+        const sobre = JSON.parse(new TextDecoder().decode(Uint8Array.from(atob(b64), (c) => c.charCodeAt(0))));
+        const recibo = JSON.parse(sobre.p);
+        return recibo && recibo.nro && sobre.h ? { p: sobre.p, h: sobre.h, recibo } : null;
+      } catch (_) { return null; }
+    }
+    const LINK = leerLink();
+    const R = LINK ? LINK.recibo : null;
+    let firmaTesoreroPng = null; // la trae el sistema (imagen "firma XX.png" del recibo)
+    let pdfGenerado = null;
+
+    const $ = (id) => document.getElementById(id);
+    const rolElegido = () => document.querySelector('input[name=rol]:checked').value;
+    const limpiarDni = (v) => String(v || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
+    function mensaje(tipo, texto) { const el = $('mensaje'); el.className = 'msg ' + tipo; el.textContent = texto; }
+
+    function actualizarDeclaracion() {
+      $('txtDeclaracionEs').textContent = TEXTO_CONSTANCIA.es(R, rolElegido());
+      $('txtDeclaracionZh').textContent = TEXTO_CONSTANCIA.zh(R, rolElegido());
+    }
+    function completarFirmanteSegunRol() {
+      if (rolElegido() === 'acampante') {
+        $('firmanteNombre').value = `${R.nombre || ''} ${R.apellido || ''}`.trim();
+        $('firmanteDni').value = R.dni || '';
+      } else {
+        $('firmanteNombre').value = '';
+        $('firmanteDni').value = '';
+      }
+      actualizarDeclaracion();
+    }
+
+    // ---------- Panel de firma ----------
+    const canvas = $('canvasFirma');
+    const ctx = canvas.getContext('2d');
+    let dibujando = false, hayTinta = false;
+    function ajustarCanvas() {
+      const r = canvas.getBoundingClientRect(), dpr = window.devicePixelRatio || 1;
+      canvas.width = Math.round(r.width * dpr); canvas.height = Math.round(r.height * dpr);
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      ctx.lineWidth = 2.6; ctx.lineCap = 'round'; ctx.lineJoin = 'round'; ctx.strokeStyle = '#0f172a';
+      hayTinta = false; $('firmaPlaceholder').classList.remove('hidden');
+    }
+    const punto = (e) => { const r = canvas.getBoundingClientRect(); return { x: e.clientX - r.left, y: e.clientY - r.top }; };
+    canvas.addEventListener('pointerdown', (e) => { dibujando = true; canvas.setPointerCapture(e.pointerId); const p = punto(e); ctx.beginPath(); ctx.moveTo(p.x, p.y); });
+    canvas.addEventListener('pointermove', (e) => {
+      if (!dibujando) return; const p = punto(e); ctx.lineTo(p.x, p.y); ctx.stroke();
+      if (!hayTinta) { hayTinta = true; $('firmaPlaceholder').classList.add('hidden'); }
+    });
+    ['pointerup', 'pointercancel', 'pointerleave'].forEach((ev) => canvas.addEventListener(ev, () => { dibujando = false; }));
+    $('btnBorrar').addEventListener('click', ajustarCanvas);
+
+    // ---------- PDF A4 ----------
+    function cargarImagen(src) {
+      return new Promise((ok, mal) => { const i = new Image(); i.onload = () => ok(i); i.onerror = mal; i.src = src; });
+    }
+    function textoEnLineas(c, texto, x, y, ancho, alto) {
+      const palabras = String(texto).split(' '); let linea = '';
+      for (const w of palabras) {
+        const prueba = linea ? linea + ' ' + w : w;
+        if (c.measureText(prueba).width > ancho && linea) { c.fillText(linea, x, y); y += alto; linea = w; } else linea = prueba;
+      }
+      if (linea) { c.fillText(linea, x, y); y += alto; }
+      return y;
+    }
+    async function generarPdf(firmante) {
+      const W = 1654, H = 2339, mx = 110, cw = W - mx * 2;
+      const hoja = document.createElement('canvas'); hoja.width = W; hoja.height = H;
+      const c = hoja.getContext('2d');
+      c.fillStyle = '#fff'; c.fillRect(0, 0, W, H); c.textBaseline = 'top';
+      const F = '"Noto Sans TC","PingFang TC","Microsoft JhengHei",Arial,sans-serif';
+
+      c.fillStyle = '#0b1b2e'; c.fillRect(0, 0, W, 170);
+      c.fillStyle = '#fbbf24'; c.font = `700 22px ${F}`; c.fillText('IGLESIA PRESBITERIANA DE TAIWÁN EN ARGENTINA (IPTA)  ·  阿根廷基督長老教會', mx, 34);
+      c.fillStyle = '#fff'; c.font = `800 38px ${F}`; c.fillText('Comprobante digital - Campamento de Verano 2027 “OVERCOMERS”', mx, 72);
+      c.fillStyle = '#cbd5e1'; c.font = `500 26px ${F}`; c.fillText('電子收據 - 2027 年夏令營「得勝者」', mx, 124);
+
+      let y = 220;
+      c.fillStyle = '#0f172a'; c.font = `800 32px ${F}`; c.fillText('RECIBO de pago', mx, y);
+      c.font = `500 24px ${F}`; c.textAlign = 'right';
+      c.fillText(`Número: #${R.nro}`, W - mx, y); c.fillText(`Fecha: ${R.fecha || ''}`, W - mx, y + 34); c.textAlign = 'left';
+      y += 90;
+      c.font = `500 26px ${F}`;
+      c.fillText(`Apellido y Nombre: ${R.apellido || ''} ${R.nombre || ''}`, mx, y); y += 42;
+      c.fillText(`DNI: ${R.dni || ''}`, mx, y); y += 64;
+
+      c.strokeStyle = '#0f172a'; c.lineWidth = 2; c.strokeRect(mx, y, cw, 50);
+      c.font = `700 24px ${F}`; c.fillText('Descripción', mx + 20, y + 12); c.fillText('Cant.', mx + 920, y + 12); c.textAlign = 'right'; c.fillText('Importe', W - mx - 20, y + 12); c.textAlign = 'left';
+      y += 50; c.font = `500 24px ${F}`;
+      (R.items || []).forEach((it) => {
+        c.strokeRect(mx, y, cw, 48); c.fillText(String(it[0] || ''), mx + 20, y + 12); c.fillText(String(it[1] || ''), mx + 920, y + 12);
+        c.textAlign = 'right'; c.fillText(String(it[2] || ''), W - mx - 20, y + 12); c.textAlign = 'left'; y += 48;
+      });
+      y += 26; c.font = `800 32px ${F}`; c.textAlign = 'right'; c.fillText(`TOTAL:   ${R.total || ''}`, W - mx, y); c.textAlign = 'left';
+      y += 80;
+
+      // Tesorero que recibió
+      c.font = `500 26px ${F}`; c.fillText(`Recibió: ${R.recibio || ''}`, mx, y);
+      c.fillText('Firma:', mx + 700, y);
+      if (firmaTesoreroPng) {
+        try { const img = await cargarImagen('data:image/png;base64,' + firmaTesoreroPng); const h = 90, w = img.width * (h / img.height); c.drawImage(img, mx + 800, y - 30, w, h); } catch (_) {}
+      }
+      y += 110;
+
+      // Constancia firmada por quien pagó
+      c.fillStyle = '#173457'; c.fillRect(mx, y, cw, 52);
+      c.fillStyle = '#fff'; c.font = `700 26px ${F}`; c.fillText('CONSTANCIA DE PAGO', mx + 20, y + 12);
+      y += 76; c.fillStyle = '#0f172a'; c.font = `500 25px ${F}`;
+      y = textoEnLineas(c, TEXTO_CONSTANCIA.es(R, firmante.rol), mx, y, cw, 36);
+      const zh = TEXTO_CONSTANCIA.zh(R, firmante.rol);
+      if (zh) { c.fillStyle = '#475569'; y = textoEnLineas(c, zh, mx, y + 6, cw, 34); }
+      y += 24; c.fillStyle = '#0f172a';
+      c.fillText(`Firmó: ${firmante.nombre}   ·   DNI: ${firmante.dni}   ·   ${firmante.rol === 'tutor' ? 'Padre, madre o tutor' : 'Acampante'}`, mx, y);
+      y += 40;
+
+      const firmaImg = await cargarImagen(canvas.toDataURL('image/png'));
+      const fh = 200, fw = Math.min(800, firmaImg.width * (fh / firmaImg.height));
+      c.drawImage(firmaImg, (W - fw) / 2, y, fw, fh);
+      y += fh + 10; c.strokeStyle = '#334155'; c.beginPath(); c.moveTo(W / 2 - 400, y); c.lineTo(W / 2 + 400, y); c.stroke();
+      c.font = `600 22px ${F}`; c.fillStyle = '#475569'; c.textAlign = 'center'; c.fillText('Firma de quien realizó el pago', W / 2, y + 12); c.textAlign = 'left';
+
+      const ahora = new Date(); const pad = (n) => String(n).padStart(2, '0');
+      c.font = `400 20px ${F}`; c.fillStyle = '#64748b';
+      c.fillText(`Firmado digitalmente el ${pad(ahora.getDate())}/${pad(ahora.getMonth() + 1)}/${ahora.getFullYear()} ${pad(ahora.getHours())}:${pad(ahora.getMinutes())} — OVERCOMERS 2027 (IPTA)`, mx, H - 70);
+
+      const { jsPDF } = window.jspdf;
+      const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4', compress: true });
+      pdf.addImage(hoja.toDataURL('image/jpeg', 0.85), 'JPEG', 0, 0, 210, 297);
+      return pdf;
+    }
+
+    // ---------- Envío ----------
+    async function enviar() {
+      const firmante = { nombre: $('firmanteNombre').value.trim(), dni: limpiarDni($('firmanteDni').value), rol: rolElegido() };
+      if (firmante.nombre.length < 3) return mensaje('error', 'Escribí el nombre y apellido de quien firma.');
+      if (firmante.dni.length < 5) return mensaje('error', 'Revisá el DNI de quien firma.');
+      if (!hayTinta) return mensaje('error', 'Falta la firma.');
+
+      const btn = $('btnEnviar'); btn.disabled = true; btn.textContent = 'Enviando...';
+      mensaje('info', 'Generando la constancia y enviándola. Puede tardar unos segundos.');
+      try {
+        pdfGenerado = await generarPdf(firmante);
+        const pdfBase64 = pdfGenerado.output('datauristring').split(',')[1];
+        const res = await fetch(URL_SISTEMA, {
+          method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify({ origen: 'pago', accion: 'guardar', p: LINK.p, h: LINK.h, firmante, pdfBase64 })
+        });
+        const data = await res.json();
+        if (!data.ok) throw new Error(data.error || 'Error desconocido');
+        $('formFirma').classList.add('hidden'); $('exito').classList.remove('hidden');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      } catch (err) {
+        mensaje('error', 'No se pudo enviar (' + err.message + '). Revisá tu conexión e intentá de nuevo.');
+        btn.disabled = false; btn.textContent = 'Firmar y enviar constancia';
+      }
+    }
+
+    // ---------- Inicio ----------
+    if (!R) {
+      $('linkInvalido').classList.remove('hidden');
+    } else {
+      $('contenido').classList.remove('hidden');
+      $('vNro').textContent = '#' + R.nro;
+      $('vFecha').textContent = R.fecha || '';
+      $('vNombre').textContent = `${R.apellido || ''} ${R.nombre || ''}`.trim();
+      $('vDni').textContent = R.dni || '';
+      $('vTotal').textContent = R.total || '';
+      $('vRecibio').textContent = R.recibio || '';
+      (R.items || []).forEach((it) => {
+        const tr = document.createElement('tr');
+        [it[0], it[1], it[2]].forEach((v, i) => { const td = document.createElement('td'); td.textContent = v || ''; if (i === 2) td.style.textAlign = 'right'; tr.appendChild(td); });
+        $('vItems').appendChild(tr);
+      });
+      document.querySelectorAll('input[name=rol]').forEach((r) => r.addEventListener('change', completarFirmanteSegunRol));
+      completarFirmanteSegunRol();
+      ajustarCanvas();
+      window.addEventListener('resize', () => { if (!hayTinta) ajustarCanvas(); });
+      $('btnEnviar').addEventListener('click', enviar);
+      $('btnDescargar').addEventListener('click', () => pdfGenerado && pdfGenerado.save(`Constancia_pago_${R.nro}.pdf`));
+
+      // Pedir la firma del tesorero (y verificar que el link sea válido)
+      fetch(URL_SISTEMA, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ origen: 'pago', accion: 'firmaTesorero', p: LINK.p, h: LINK.h }) })
+        .then((r) => r.json())
+        .then((d) => {
+          if (d.ok) { firmaTesoreroPng = d.png || null; return; }
+          $('contenido').classList.add('hidden'); $('linkInvalido').classList.remove('hidden');
+          $('linkInvalido').textContent = d.error || 'Este link no es válido.';
+        })
+        .catch(() => {});
+    }
+  </script>
+</body>
+</html>
