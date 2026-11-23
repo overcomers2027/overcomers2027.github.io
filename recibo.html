@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Emitir comprobante — OVERCOMERS 2027</title>
+  <!--
+    Formulario para EMITIR RECIBOS (uso interno de tesorería).
+    Se abre solo desde la planilla: menú 🧾 Recibos → "Emitir comprobante de la fila seleccionada".
+    Los datos (fila, número, persona, emisores y dirección del sistema de recibos) llegan en el
+    "#" del link, que no se envía a ningún servidor ni queda en este archivo público.
+    Envía EXACTAMENTE el mismo pedido que la ventana ModalRecibo.html del sistema del líder.
+  -->
+  <style>
+    * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+    body { margin: 0; padding: 20px 14px 40px; color: #1f2937; font-size: 14px; background: #f1f5f9; }
+    .card { max-width: 640px; margin: 0 auto; background: #fff; border-radius: 12px; padding: 18px; box-shadow: 0 1px 3px rgba(0,0,0,.08); }
+    h1 { font-size: 19px; margin: 0 0 14px; color: #0f172a; }
+    .header-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; background: #f3f4f6; padding: 10px 12px; border-radius: 8px; margin-bottom: 12px; }
+    .header-grid label { font-size: 11px; color: #6b7280; display: block; font-weight: 600; }
+    .header-grid input, .header-grid select { width: 100%; padding: 7px 8px; border: 1px solid #d1d5db; border-radius: 5px; font-size: 14px; margin-top: 2px; background: #fff; }
+    .item-box { border: 1px solid #e5e7eb; border-radius: 8px; padding: 10px; margin-bottom: 8px; background: #fafafa; }
+    .item-title { font-weight: 700; color: #111827; margin-bottom: 6px; font-size: 12px; }
+    .item-row { display: grid; grid-template-columns: 2.4fr 0.7fr 1.1fr 1.1fr; gap: 6px; align-items: end; }
+    .item-row label { font-size: 11px; color: #4b5563; display: block; margin-bottom: 2px; }
+    .item-row input { width: 100%; padding: 7px 6px; border: 1px solid #d1d5db; border-radius: 5px; font-size: 13px; }
+    .item-row input[readonly] { background: #e5e7eb; font-weight: 600; color: #111827; }
+    details { border: 1px solid #e5e7eb; border-radius: 7px; margin-bottom: 6px; background: #fff; }
+    summary { padding: 8px 12px; font-weight: 600; cursor: pointer; color: #374151; list-style: none; display: flex; justify-content: space-between; align-items: center; }
+    summary::-webkit-details-marker { display: none; }
+    summary::after { content: "+ Expandir"; font-size: 11px; color: #2563eb; font-weight: 500; }
+    details[open] summary::after { content: "− Ocultar"; color: #6b7280; }
+    .details-body { padding: 10px; }
+    .footer-bar { border-top: 2px solid #e5e7eb; padding-top: 12px; margin-top: 12px; display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; }
+    .total-display { font-size: 18px; font-weight: 800; color: #059669; }
+    button { padding: 10px 18px; border-radius: 6px; font-weight: 700; cursor: pointer; border: none; font-size: 14px; background: #2563eb; color: #fff; }
+    button:disabled { background: #93c5fd; cursor: not-allowed; }
+    .msg { display: none; margin-top: 12px; padding: 10px 12px; border-radius: 6px; font-size: 13.5px; font-weight: 600; }
+    .msg.error { display: block; background: #fee2e2; color: #991b1b; border: 1px solid #fca5a5; }
+    .msg.info { display: block; background: #e0f2fe; color: #075985; border: 1px solid #7dd3fc; }
+    .msg.ok { display: block; background: #dcfce7; color: #166534; border: 1px solid #86efac; }
+    .hidden { display: none; }
+    @media (max-width: 560px) { .header-grid { grid-template-columns: 1fr; } .item-row { grid-template-columns: 1fr 1fr; } }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>Emitir Comprobante Digital - OVERCOMERS 2027</h1>
+
+    <div id="sinDatos" class="msg error">
+      Este formulario se abre desde la planilla: menú <strong>🧾 Recibos → Emitir comprobante de la fila seleccionada</strong>.
+    </div>
+
+    <div id="formulario" class="hidden">
+      <div class="header-grid">
+        <div>
+          <label>Apellido (Recibo #<span id="nroTexto"></span>)</label>
+          <input type="text" id="apellido">
+        </div>
+        <div>
+          <label>Nombre</label>
+          <input type="text" id="nombre">
+        </div>
+        <div>
+          <label>DNI</label>
+          <input type="text" id="dni">
+        </div>
+        <div>
+          <label>Email de envío</label>
+          <input type="email" id="email" placeholder="correo@ejemplo.com">
+        </div>
+        <div style="grid-column: 1 / -1;">
+          <label>Emitido por / Recibió</label>
+          <select id="recibio" onchange="limpiarMensaje()">
+            <option value="" disabled selected>Seleccionar...</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="item-box">
+        <div class="item-title">Ítem 1 (Principal)</div>
+        <div class="item-row">
+          <div><label>Descripción</label><input type="text" id="desc1" value="Seña/Inscripción "></div>
+          <div><label>Cant.</label><input type="text" inputmode="numeric" id="cant1" value="1" oninput="recalcular()"></div>
+          <div><label>Subtotal ($)</label><input type="text" inputmode="numeric" id="sub1" placeholder="Ej: 450.000" oninput="recalcular()"></div>
+          <div><label>Importe</label><input type="text" id="imp1" readonly value="$ 0"></div>
+        </div>
+      </div>
+
+      <div id="items-extra"></div>
+
+      <div id="mensaje" class="msg"></div>
+
+      <div class="footer-bar">
+        <div>
+          <span style="font-size: 11px; color: #6b7280; display: block;">TOTAL A EMITIR</span>
+          <span class="total-display" id="totalTexto">$ 0</span>
+        </div>
+        <button type="button" id="btnGenerar" onclick="enviarDatos()">Generar PDF</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ---- Datos que llegan desde la planilla en el "#" del link ----
+    function leerDatosDelLink() {
+      try {
+        const m = location.hash.match(/[#&]d=([A-Za-z0-9_\-=]+)/);
+        if (!m) return null;
+        let b64 = m[1].replace(/-/g, "+").replace(/_/g, "/");
+        while (b64.length % 4) b64 += "=";
+        const bytes = Uint8Array.from(atob(b64), (c) => c.charCodeAt(0));
+        const d = JSON.parse(new TextDecoder().decode(bytes));
+        return d && d.u && d.nro && d.fila ? d : null;
+      } catch (_) {
+        return null;
+      }
+    }
+
+    const DATOS = leerDatosDelLink();
+    const CLAVE_EMITIDO = DATOS ? "recibo-emitido:" + DATOS.nro + ":" + DATOS.fila : "";
+
+    function formatearARS(valor) {
+      return "$ " + Number(valor || 0).toLocaleString("es-AR");
+    }
+
+    // Montos en pesos sin centavos: "450.000", "450000", "$ 450.000" -> 450000
+    function leerNumero(id) {
+      const soloDigitos = String(document.getElementById(id).value || "").replace(/[^\d]/g, "");
+      return Number(soloDigitos) || 0;
+    }
+
+    function mostrarMensaje(tipo, texto) {
+      const el = document.getElementById("mensaje");
+      el.className = "msg " + tipo;
+      el.textContent = texto;
+    }
+
+    function limpiarMensaje() {
+      const el = document.getElementById("mensaje");
+      el.className = "msg";
+      el.textContent = "";
+    }
+
+    function recalcular() {
+      let totalGeneral = 0;
+      for (let i = 1; i <= 7; i++) {
+        const imp = leerNumero("cant" + i) * leerNumero("sub" + i);
+        document.getElementById("imp" + i).value = formatearARS(imp);
+        totalGeneral += imp;
+        if (i >= 2) {
+          document.getElementById("badge" + i).textContent = imp > 0 ? "(" + formatearARS(imp) + ")" : "";
+        }
+      }
+      document.getElementById("totalTexto").textContent = formatearARS(totalGeneral);
+      limpiarMensaje();
+      return totalGeneral;
+    }
+
+    function armarItemsExtra() {
+      const contenedor = document.getElementById("items-extra");
+      for (let i = 2; i <= 7; i++) {
+        contenedor.insertAdjacentHTML("beforeend",
+          '<details><summary>Ítem ' + i + ' <span id="badge' + i + '" style="font-weight:400; color:#059669; font-size:12px;"></span></summary>' +
+          '<div class="details-body"><div class="item-row">' +
+          '<div><label>Descripción</label><input type="text" id="desc' + i + '" placeholder="Opcional (ej: Transporte / Seña)"></div>' +
+          '<div><label>Cant.</label><input type="text" inputmode="numeric" id="cant' + i + '" value="1" oninput="recalcular()"></div>' +
+          '<div><label>Subtotal ($)</label><input type="text" inputmode="numeric" id="sub' + i + '" placeholder="0" oninput="recalcular()"></div>' +
+          '<div><label>Importe</label><input type="text" id="imp' + i + '" readonly value="$ 0"></div>' +
+          '</div></div></details>');
+      }
+    }
+
+    function enviarDatos() {
+      const selectRecibio = document.getElementById("recibio");
+      const codigoFirma = selectRecibio.value;
+
+      if (!codigoFirma) {
+        mostrarMensaje("error", "Elegí quién emite el recibo en \"Emitido por / Recibió\".");
+        selectRecibio.focus();
+        return;
+      }
+      if (recalcular() <= 0) {
+        mostrarMensaje("error", "El total es $ 0. Escribí el monto en \"Subtotal\" (por ejemplo 450.000).");
+        document.getElementById("sub1").focus();
+        return;
+      }
+      if (localStorage.getItem(CLAVE_EMITIDO)) {
+        mostrarMensaje("error", "Este recibo (" + DATOS.nro + ") ya fue emitido desde esta computadora. Para otro recibo, volvé a abrir el menú en la planilla.");
+        return;
+      }
+
+      const btn = document.getElementById("btnGenerar");
+      btn.disabled = true;
+      btn.textContent = "Generando PDF...";
+      mostrarMensaje("info", "Generando el comprobante y enviando el mail. Puede tardar unos 20 segundos, no cierres esta pestaña.");
+
+      const items = [];
+      let totalGeneral = 0;
+      for (let i = 1; i <= 7; i++) {
+        const desc = document.getElementById("desc" + i).value.trim();
+        const cant = leerNumero("cant" + i);
+        const sub = leerNumero("sub" + i);
+        const imp = cant * sub;
+        if (desc !== "" || sub > 0) {
+          totalGeneral += imp;
+          items.push({ desc: desc, cant: String(cant), subFormateado: formatearARS(sub), impFormateado: formatearARS(imp) });
+        } else {
+          items.push({ desc: "", cant: "", subFormateado: "", impFormateado: "" });
+        }
+      }
+
+      // Mismo pedido que envía ModalRecibo.html
+      const payload = {
+        fila: Number(DATOS.fila),
+        nro: DATOS.nro,
+        email: document.getElementById("email").value.trim(),
+        apellido: document.getElementById("apellido").value.trim(),
+        nombre: document.getElementById("nombre").value.trim(),
+        dni: document.getElementById("dni").value.trim(),
+        codigoFirma: codigoFirma,
+        recibio: selectRecibio.options[selectRecibio.selectedIndex].text,
+        items: items,
+        totalFormateado: formatearARS(totalGeneral)
+      };
+
+      fetch(DATOS.u, { method: "POST", body: JSON.stringify(payload) })
+        .then((res) => res.json())
+        .then((data) => {
+          if (!data.ok) throw new Error(data.error || "Error desconocido");
+          localStorage.setItem(CLAVE_EMITIDO, new Date().toISOString());
+          history.replaceState(null, "", location.pathname); // que no se pueda reenviar recargando
+          btn.textContent = "Emitido ✓";
+          mostrarMensaje("ok", "✅ Listo: comprobante " + payload.nro + " generado" +
+            (payload.email ? " y enviado a " + payload.email : "") + ". Ya podés cerrar esta pestaña.");
+        })
+        .catch((err) => {
+          mostrarMensaje("error", "No se pudo generar: " + err.message);
+          btn.disabled = false;
+          btn.textContent = "Generar PDF";
+        });
+    }
+
+    // ---- Inicio ----
+    if (DATOS) {
+      document.getElementById("sinDatos").classList.add("hidden");
+      document.getElementById("formulario").classList.remove("hidden");
+      document.getElementById("nroTexto").textContent = DATOS.nro;
+      document.getElementById("apellido").value = DATOS.apellido || "";
+      document.getElementById("nombre").value = DATOS.nombre || "";
+      document.getElementById("dni").value = DATOS.dni || "";
+      document.getElementById("email").value = DATOS.email || "";
+      const select = document.getElementById("recibio");
+      (DATOS.emisores || []).forEach(([codigo, nombre]) => select.add(new Option(nombre, codigo)));
+      armarItemsExtra();
+      if (localStorage.getItem(CLAVE_EMITIDO)) {
+        mostrarMensaje("error", "Este recibo (" + DATOS.nro + ") ya fue emitido desde esta computadora. Para otro recibo, volvé a abrir el menú en la planilla.");
+        document.getElementById("btnGenerar").disabled = true;
+      }
+    }
+  </script>
+</body>
+</html>
